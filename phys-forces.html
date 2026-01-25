@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forces & Newton's Laws</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lab-container { position: relative; height: 400px; background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 30px; border: 3px solid #3b82f6; overflow: hidden; }
+        .object { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .block { width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); border: 2px solid #991b1b; }
+        .floor { position: absolute; bottom: 0; width: 100%; height: 80px; background: linear-gradient(90deg, #78716c 0%, #92400e 100%); border-top: 3px solid #44403c; }
+        .force-arrow { position: absolute; height: 4px; background: #3b82f6; top: 50%; display: flex; align-items: center; }
+        .force-arrow::after { content: '→'; position: absolute; right: -15px; font-size: 1.2rem; color: #3b82f6; font-weight: bold; }
+        .force-label { position: absolute; top: -25px; background: white; padding: 5px 10px; border-radius: 5px; border: 1px solid #3b82f6; font-size: 0.85rem; font-weight: bold; color: #3b82f6; white-space: nowrap; }
+        .info-panel { margin-top: 20px; padding: 20px; background: white; border-radius: 15px; border-left: 5px solid #3b82f6; }
+        .formula-box { background: #eef2ff; padding: 15px; border-radius: 10px; margin-top: 15px; font-family: monospace; text-align: left; border-left: 4px solid #3b82f6; }
+        .data-display { margin-top: 15px; background: #eef2ff; padding: 15px; border-radius: 10px; font-family: monospace; text-align: left; }
+        .control-panel { margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 10px; }
+        .slider-group { margin: 15px 0; text-align: left; }
+        .slider-group label { font-weight: bold; display: block; margin-bottom: 5px; }
+        .slider-group input[type="range"] { width: 100%; }
+        .value-display { display: inline-block; margin-left: 10px; background: white; padding: 5px 10px; border-radius: 5px; border: 1px solid #cbd5e1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="phys-main.html" class="btn" style="background:#3b82f6">← Back to Physics Lab</a>
+        <h2>Newton's Laws: Forces & Motion</h2>
+
+        <div class="lab-container" id="lab">
+            <div class="floor"></div>
+            <div id="block" class="object block" style="left: 15%; bottom: 80px;"></div>
+            <div id="force-visual" style="position: absolute; left: 30%; top: 50%; transform: translateY(-50%);"></div>
+        </div>
+
+        <div class="control-panel">
+            <div class="slider-group">
+                <label>Applied Force: <span class="value-display" id="force-value">50 N</span></label>
+                <input type="range" id="force-slider" min="0" max="500" value="50" oninput="updateForce(this.value)">
+            </div>
+            <div class="slider-group">
+                <label>Friction Coefficient: <span class="value-display" id="friction-value">0.3</span></label>
+                <input type="range" id="friction-slider" min="0" max="1" step="0.1" value="0.3" oninput="updateFriction(this.value)">
+            </div>
+        </div>
+
+        <div class="info-panel" id="instruction">
+            <strong>Newton's Laws in Action:</strong> 
+            <br><b>1st Law:</b> Object at rest stays at rest unless force acts on it.
+            <br><b>2nd Law:</b> F = ma (Acceleration depends on force and mass)
+            <br><b>3rd Law:</b> For every action, there's an equal reaction force.
+        </div>
+
+        <div class="formula-box">
+            <b>Friction Force:</b> f = μ × N<br>
+            <b>Net Force:</b> F_net = Applied Force - Friction<br>
+            <b>Acceleration:</b> a = F_net / m<br>
+            <b>Mass:</b> 10 kg (constant)
+        </div>
+
+        <button class="btn" id="applyBtn" onclick="applyForce()" style="margin-top:20px; background:#3b82f6; margin-right: 10px;">Apply Force</button>
+        <button class="btn" onclick="resetLab()" style="margin-top:20px; background:#64748b;">Reset</button>
+
+        <div class="data-display" id="data" style="display:none;">
+            <strong>Calculated Results:</strong><br>
+            Applied Force: <span id="data-applied">0</span> N<br>
+            Friction Force: <span id="data-friction">0</span> N<br>
+            Net Force: <span id="data-net">0</span> N<br>
+            Acceleration: <span id="data-accel">0</span> m/s²<br>
+            Distance Traveled: <span id="data-distance">0</span> m
+        </div>
+    </div>
+
+    <script>
+        let currentForce = 50;
+        let currentFriction = 0.3;
+        const mass = 10; // kg
+        const g = 9.8; // m/s²
+        const normalForce = mass * g; // N
+
+        function updateForce(value) {
+            currentForce = parseFloat(value);
+            document.getElementById('force-value').textContent = currentForce.toFixed(0) + ' N';
+        }
+
+        function updateFriction(value) {
+            currentFriction = parseFloat(value);
+            document.getElementById('friction-value').textContent = currentFriction.toFixed(1);
+        }
+
+        function applyForce() {
+            document.getElementById('applyBtn').disabled = true;
+            const block = document.getElementById('block');
+            
+            // Calculate forces
+            const frictionForce = currentFriction * normalForce;
+            const netForce = currentForce - frictionForce;
+            const acceleration = netForce / mass;
+            
+            // Only move if net force is positive
+            if (netForce <= 0) {
+                alert('Friction is too strong! Increase applied force or reduce friction coefficient.');
+                document.getElementById('applyBtn').disabled = false;
+                return;
+            }
+
+            // Calculate distance using v² = u² + 2as
+            // Assuming motion over 3 seconds
+            const time = 3;
+            const distance = 0.5 * acceleration * time * time;
+            const maxDistance = window.innerWidth * 0.5; // Don't go off screen
+            const actualDistance = Math.min(distance * 20, maxDistance); // Scale for visibility
+
+            block.style.transition = time + 's cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            block.style.left = 'calc(15% + ' + actualDistance + 'px)';
+
+            setTimeout(() => {
+                // Display results
+                document.getElementById('data-applied').textContent = currentForce.toFixed(1);
+                document.getElementById('data-friction').textContent = frictionForce.toFixed(2);
+                document.getElementById('data-net').textContent = netForce.toFixed(2);
+                document.getElementById('data-accel').textContent = acceleration.toFixed(2);
+                document.getElementById('data-distance').textContent = distance.toFixed(1);
+                document.getElementById('data').style.display = 'block';
+                document.getElementById('applyBtn').disabled = false;
+            }, time * 1000);
+        }
+
+        function resetLab() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Interactive Lab - Enhanced</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .physics-nav {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .physics-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .physics-nav a:hover {
+            color: var(--primary-phys);
+        }
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary-phys);
+        }
+        
+        .page-title h1 {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            margin-bottom: 0.5rem;
+        }
+        
+        .experiments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .experiment-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .experiment-card:hover {
+            border-color: var(--primary-phys);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(78, 205, 196, 0.2);
+        }
+        
+        .experiment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .experiment-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .experiment-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .lab-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .lab-canvas {
+            width: 100%;
+            height: clamp(300px, 60vw, 500px);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f5ff 100%);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .controls-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .control-value {
+            background: white;
+            color: var(--primary-phys);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .range-slider {
+            width: 100%;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-experiment {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-phys), var(--accent-phys));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-experiment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.3);
+        }
+        
+        .data-display {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(149, 225, 211, 0.1));
+            border-left: 4px solid var(--primary-phys);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        .data-display.show {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+        }
+        
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .data-value {
+            background: white;
+            color: var(--primary-phys);
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .experiments-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .lab-section {
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .btn-experiment {
+                min-width: unset;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-container {
+                padding: 1rem;
+            }
+            
+            .experiments-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+            
+            .lab-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .lab-canvas {
+                height: 250px;
+                margin: 1rem 0;
+            }
+            
+            .controls-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .control-label {
+                font-size: 0.9rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="physics-nav">
+        <h3 style="color: var(--primary-phys); margin: 0;">⚛️ Physics Lab</h3>
+        <a href="science.html">← Back</a>
+    </nav>
+    
+    <div class="page-container">
+        <div class="page-title">
+            <h1>Physics Virtual Laboratory</h1>
+            <p>Master fundamental laws of motion, forces, and energy through interactive experiments</p>
+        </div>
+        
+        <div class="experiments-grid">
+            <div class="experiment-card" onclick="loadExperiment('gravity')">
+                <div class="experiment-icon">🌍</div>
+                <div class="experiment-title">Gravity & Free Fall</div>
+                <div class="experiment-desc">Compare gravitational acceleration on different celestial bodies</div>
+            </div>
+            <div class="experiment-card" onclick="loadExperiment('forces')">
+                <div class="experiment-icon">💪</div>
+                <div class="experiment-title">Forces & Friction</div>
+                <div class="experiment-desc">Understand Newton's Laws and friction forces</div>
+            </div>
+            <div class="experiment-card" onclick="loadExperiment('energy')">
+                <div class="experiment-icon">⚡</div>
+                <div class="experiment-title">Kinetic Energy</div>
+                <div class="experiment-desc">Explore energy of moving objects</div>
+            </div>
+            <div class="experiment-card" onclick="loadExperiment('pendulum')">
+                <div class="experiment-icon">🎪</div>
+                <div class="experiment-title">Pendulum Motion</div>
+                <div class="experiment-desc">Study simple harmonic motion</div>
+            </div>
+        </div>
+        
+        <!-- GRAVITY EXPERIMENT -->
+        <div id="gravity-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-phys); margin-top: 0;">Gravity & Free Fall Experiment</h2>
+            <p>Compare how objects fall under different gravitational accelerations.</p>
+            
+            <div class="lab-canvas" id="gravity-canvas">
+                <p style="color: var(--text-muted);">Canvas loading...</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Drop Height</span>
+                        <span class="control-value" id="height-value">100 m</span>
+                    </div>
+                    <input type="range" class="range-slider" id="height-slider" min="50" max="200" value="100" oninput="updateHeight(this.value)">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-experiment" onclick="runGravityExperiment()">🚀 Drop Objects</button>
+                <button class="btn-experiment" style="background: white; color: var(--primary-phys); border: 2px solid var(--primary-phys);" onclick="resetGravityExperiment()">Reset</button>
+            </div>
+            
+            <div class="data-display" id="gravity-data">
+                <div class="data-row">
+                    <span class="data-label">Earth - Time to Fall</span>
+                    <span class="data-value" id="earth-time">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Moon - Time to Fall</span>
+                    <span class="data-value" id="moon-time">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Earth - Final Velocity</span>
+                    <span class="data-value" id="earth-vel">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Moon - Final Velocity</span>
+                    <span class="data-value" id="moon-vel">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FORCES EXPERIMENT -->
+        <div id="forces-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-phys); margin-top: 0;">Forces & Friction Experiment</h2>
+            <p>Apply different forces and observe how friction affects motion (F = ma).</p>
+            
+            <div class="lab-canvas" id="forces-canvas">
+                <p style="color: var(--text-muted);">Canvas loading...</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Applied Force</span>
+                        <span class="control-value" id="force-value">50 N</span>
+                    </div>
+                    <input type="range" class="range-slider" id="force-slider" min="0" max="500" value="50" oninput="updateForce(this.value)">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Friction Coefficient (μ)</span>
+                        <span class="control-value" id="friction-value">0.3</span>
+                    </div>
+                    <input type="range" class="range-slider" id="friction-slider" min="0" max="1" step="0.1" value="0.3" oninput="updateFriction(this.value)">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-experiment" onclick="runForcesExperiment()">💥 Apply Force</button>
+                <button class="btn-experiment" style="background: white; color: var(--primary-phys); border: 2px solid var(--primary-phys);" onclick="resetForcesExperiment()">Reset</button>
+            </div>
+            
+            <div class="data-display" id="forces-data">
+                <div class="data-row">
+                    <span class="data-label">Applied Force (F)</span>
+                    <span class="data-value" id="f-applied">-- N</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Friction Force (f)</span>
+                    <span class="data-value" id="f-friction">-- N</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Net Force (F_net)</span>
+                    <span class="data-value" id="f-net">-- N</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Acceleration (a)</span>
+                    <span class="data-value" id="f-accel">-- m/s²</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Distance Traveled</span>
+                    <span class="data-value" id="f-distance">-- m</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ENERGY EXPERIMENT -->
+        <div id="energy-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-phys); margin-top: 0;">Kinetic Energy Experiment</h2>
+            <p>Calculate kinetic energy for objects of different masses: KE = ½mv²</p>
+            
+            <div class="lab-canvas" id="energy-canvas">
+                <p style="color: var(--text-muted);">Canvas loading...</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Velocity</span>
+                        <span class="control-value" id="vel-value">10 m/s</span>
+                    </div>
+                    <input type="range" class="range-slider" id="vel-slider" min="1" max="30" value="10" oninput="updateVelocity(this.value)">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-experiment" onclick="runEnergyExperiment()">🎯 Release Objects</button>
+                <button class="btn-experiment" style="background: white; color: var(--primary-phys); border: 2px solid var(--primary-phys);" onclick="resetEnergyExperiment()">Reset</button>
+            </div>
+            
+            <div class="data-display" id="energy-data">
+                <div class="data-row">
+                    <span class="data-label">Light Object (2kg) - KE</span>
+                    <span class="data-value" id="ke-light">-- J</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Heavy Object (5kg) - KE</span>
+                    <span class="data-value" id="ke-heavy">-- J</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Energy Ratio</span>
+                    <span class="data-value" id="ke-ratio">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PENDULUM EXPERIMENT -->
+        <div id="pendulum-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-phys); margin-top: 0;">Pendulum Motion Experiment</h2>
+            <p>Observe simple harmonic motion and calculate the period: T = 2π√(L/g)</p>
+            
+            <div class="lab-canvas" id="pendulum-canvas">
+                <p style="color: var(--text-muted);">Canvas loading...</p>
+            </div>
+            
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Pendulum Length</span>
+                        <span class="control-value" id="length-value">1.0 m</span>
+                    </div>
+                    <input type="range" class="range-slider" id="length-slider" min="0.5" max="3" step="0.1" value="1" oninput="updateLength(this.value)">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-experiment" onclick="runPendulumExperiment()">🎪 Start Swinging</button>
+                <button class="btn-experiment" style="background: white; color: var(--primary-phys); border: 2px solid var(--primary-phys);" onclick="resetPendulumExperiment()">Reset</button>
+            </div>
+            
+            <div class="data-display" id="pendulum-data">
+                <div class="data-row">
+                    <span class="data-label">Calculated Period (T)</span>
+                    <span class="data-value" id="period-calc">-- s</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Formula</span>
+                    <span class="data-value" style="font-size: 0.8rem;">T = 2π√(L/g)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExperiment = null;
+        let heightValue = 100;
+        let forceValue = 50;
+        let frictionValue = 0.3;
+        let velocityValue = 10;
+        let lengthValue = 1;
+        
+        function loadExperiment(exp) {
+            document.querySelectorAll('[id$="-section"]').forEach(el => el.style.display = 'none');
+            currentExperiment = exp;
+            document.getElementById(exp + '-section').style.display = 'block';
+            document.querySelector('.page-container').scrollIntoView({behavior: 'smooth'});
+        }
+        
+        // Height updater
+        function updateHeight(val) {
+            heightValue = val;
+            document.getElementById('height-value').textContent = val + ' m';
+        }
+        
+        // Force updater
+        function updateForce(val) {
+            forceValue = val;
+            document.getElementById('force-value').textContent = val + ' N';
+        }
+        
+        // Friction updater
+        function updateFriction(val) {
+            frictionValue = val;
+            document.getElementById('friction-value').textContent = parseFloat(val).toFixed(1);
+        }
+        
+        // Velocity updater
+        function updateVelocity(val) {
+            velocityValue = val;
+            document.getElementById('vel-value').textContent = val + ' m/s';
+        }
+        
+        // Length updater
+        function updateLength(val) {
+            lengthValue = val;
+            document.getElementById('length-value').textContent = parseFloat(val).toFixed(1) + ' m';
+        }
+        
+        // GRAVITY EXPERIMENT
+        function runGravityExperiment() {
+            const g_earth = 9.8;
+            const g_moon = 1.6;
+            const h = parseFloat(heightValue);
+            
+            const t_earth = Math.sqrt(2 * h / g_earth);
+            const t_moon = Math.sqrt(2 * h / g_moon);
+            const v_earth = g_earth * t_earth;
+            const v_moon = g_moon * t_moon;
+            
+            document.getElementById('earth-time').textContent = t_earth.toFixed(2) + ' s';
+            document.getElementById('moon-time').textContent = t_moon.toFixed(2) + ' s';
+            document.getElementById('earth-vel').textContent = v_earth.toFixed(2) + ' m/s';
+            document.getElementById('moon-vel').textContent = v_moon.toFixed(2) + ' m/s';
+            document.getElementById('gravity-data').classList.add('show');
+        }
+        
+        function resetGravityExperiment() {
+            document.getElementById('gravity-data').classList.remove('show');
+        }
+        
+        // FORCES EXPERIMENT
+        function runForcesExperiment() {
+            const mass = 10;
+            const g = 9.8;
+            const N = mass * g;
+            const f = frictionValue * N;
+            const F_net = parseFloat(forceValue) - f;
+            const a = F_net / mass;
+            const distance = 0.5 * a * 9;
+            
+            if (F_net <= 0) {
+                alert('⚠️ Friction is too strong! Increase force or reduce friction.');
+                return;
+            }
+            
+            document.getElementById('f-applied').textContent = parseFloat(forceValue).toFixed(1) + ' N';
+            document.getElementById('f-friction').textContent = f.toFixed(2) + ' N';
+            document.getElementById('f-net').textContent = F_net.toFixed(2) + ' N';
+            document.getElementById('f-accel').textContent = a.toFixed(2) + ' m/s²';
+            document.getElementById('f-distance').textContent = distance.toFixed(2) + ' m';
+            document.getElementById('forces-data').classList.add('show');
+        }
+        
+        function resetForcesExperiment() {
+            document.getElementById('forces-data').classList.remove('show');
+        }
+        
+        // ENERGY EXPERIMENT
+        function runEnergyExperiment() {
+            const m_light = 2;
+            const m_heavy = 5;
+            const v = parseFloat(velocityValue);
+            
+            const ke_light = 0.5 * m_light * v * v;
+            const ke_heavy = 0.5 * m_heavy * v * v;
+            const ratio = (ke_heavy / ke_light).toFixed(2);
+            
+            document.getElementById('ke-light').textContent = ke_light.toFixed(2) + ' J';
+            document.getElementById('ke-heavy').textContent = ke_heavy.toFixed(2) + ' J';
+            document.getElementById('ke-ratio').textContent = ratio + 'x';
+            document.getElementById('energy-data').classList.add('show');
+        }
+        
+        function resetEnergyExperiment() {
+            document.getElementById('energy-data').classList.remove('show');
+        }
+        
+        // PENDULUM EXPERIMENT
+        function runPendulumExperiment() {
+            const L = parseFloat(lengthValue);
+            const g = 9.8;
+            const period = 2 * Math.PI * Math.sqrt(L / g);
+            
+            document.getElementById('period-calc').textContent = period.toFixed(2) + ' s';
+            document.getElementById('pendulum-data').classList.add('show');
+        }
+        
+        function resetPendulumExperiment() {
+            document.getElementById('pendulum-data').classList.remove('show');
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            loadExperiment('gravity');
+        });
+    </script>
+</body>
+</html>

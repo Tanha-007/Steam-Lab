@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Interactive Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #ef4444;    /* Chemistry accent color */
+            --primary-blue: #3b82f6;   /* For Hydrogen, Physics accent */
+            --primary-green: #10b981;  /* For Chlorine, Biology accent */
+            --primary-purple: #a855f7; /* For Sodium */
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --bg-canvas: #ffffff;
+            --border-light: #e2e8f0;
+            --shadow-light: rgba(0,0,0,0.08);
+            --shadow-strong: rgba(0,0,0,0.15);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 960px;
+            margin: auto;
+            background: var(--bg-canvas);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-light);
+        }
+        h1, h2 {
+            color: var(--text-dark);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1rem;
+            color: #4b5563;
+        }
+
+        /* Menu & Buttons */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .btn-topic {
+            background: var(--primary-red);
+            color: white;
+            padding: 15px 10px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-topic:hover {
+            background: #dc2626;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-strong);
+        }
+        .btn-action {
+            background: var(--primary-blue);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .btn-action:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Lab Canvas */
+        .lab-canvas {
+            height: 480px;
+            background: var(--bg-canvas);
+            border: 2px solid var(--border-light);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+        }
+
+        /* Atom & Particles */
+        .nucleus {
+            width: 110px; height: 110px;
+            background: #fee2e2;
+            border: 3px solid var(--primary-red);
+            border-radius: 50%;
+            display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
+            gap: 6px;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+        .particle {
+            width: 30px; height: 30px; border-radius: 50%;
+            color: white; font-weight: 600; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .proton { background: var(--primary-red); }
+        .neutron { background: #94a3b8; }
+        
+        /* Electron Shells */
+        .shell {
+            position: absolute; border: 1.5px dashed #94a3b8; border-radius: 50%;
+            animation: rotate 12s linear infinite;
+        }
+        .electron {
+            width: 16px; height: 16px; background: #facc15; border: 2px solid #ca8a04; border-radius: 50%;
+            position: absolute;
+            transition: all 1s ease-out; /* For electron movement */
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Bonding Atoms */
+        .atom {
+            position: absolute; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 1.6rem;
+            transition: all 1.5s ease-in-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .atom-o { width: 100px; height: 100px; background: var(--primary-red); z-index: 5; }
+        .atom-h { width: 60px; height: 60px; background: var(--primary-blue); }
+        .atom-na { width: 80px; height: 80px; background: var(--primary-purple); }
+        .atom-cl { width: 110px; height: 110px; background: var(--primary-green); }
+
+        /* Info Panel */
+        .info-panel {
+            background: #eef2ff;
+            border-left: 6px solid var(--primary-blue);
+            padding: 20px;
+            text-align: left;
+            border-radius: 10px;
+            min-height: 100px;
+            font-size: 0.95rem;
+            color: #374151;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+        .info-panel b {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+        .info-panel button {
+            background: var(--primary-blue);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button style="background: #fee2e2; color: #991b1b; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 20px;" onclick="window.location.href='science.html'">← Back to Science Hub</button>
+    
+    <h1 style="color: var(--primary-red);">Chemistry Interactive Lab</h1>
+    <p>Dive deep into the world of atoms, molecules, and chemical bonds.</p>
+    
+    <div class="menu-grid">
+        <button class="btn-topic" onclick="loadAtomExplorer()">1. Atom Explorer</button>
+        <button class="btn-topic" onclick="loadMoleculeWorld()">2. Molecule World (2n²)</button>
+        <button class="btn-topic" onclick="loadH2OFormation()">3. H₂O Formation</button>
+        <button class="btn-topic" onclick="loadNaClFormation()">4. NaCl Formation</button>
+    </div>
+
+    <div class="lab-canvas" id="chem-canvas">
+        <p style="color: #6b7280;">Select a topic above to start your chemistry experiment!</p>
+    </div>
+
+    <div class="info-panel" id="chem-info">
+        <b>Welcome to Chemistry!</b> Here, we'll visually explore the fundamental concepts of matter.
+    </div>
+</div>
+
+<script>
+    const chemCanvas = document.getElementById('chem-canvas');
+    const chemInfo = document.getElementById('chem-info');
+
+    // 1. Atom Explorer
+    function loadAtomExplorer() {
+        chemCanvas.innerHTML = `
+            <div class="shell rotating" style="width: 280px; height: 280px;">
+                <div class="electron" style="top: -8px; left: 50%;"></div>
+            </div>
+            <div class="nucleus">
+                <div class="particle proton">+</div>
+                <div class="particle neutron">0</div>
+                <div class="particle neutron">0</div>
+                <div class="particle proton">+</div>
+            </div>`;
+        chemInfo.innerHTML = "<b>Atom Structure:</b> The atom consists of a central **Nucleus** (containing positively charged **Protons** and neutral **Neutrons**) and negatively charged **Electrons** orbiting in specific paths called **shells**.";
+    }
+
+    // 2. Molecule World (2n² Rule for Electron Shells)
+    function loadMoleculeWorld() {
+        window.location.href = 'sci-molecule-world.html';
+    }
+
+    // 3. H₂O Formation (Covalent Bond)
+    function loadH2OFormation() {
+        chemCanvas.innerHTML = `
+            <div class="atom atom-o" id="oxygen-atom" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">O</div>
+            <div class="atom atom-h" id="hydrogen1" style="left: 15%; top: 100px;">H</div>
+            <div class="atom atom-h" id="hydrogen2" style="left: 15%; bottom: 100px;">H</div>`;
+        chemInfo.innerHTML = "<b>Covalent Bonding:</b> To achieve stability, atoms often share electrons. Oxygen needs 2 electrons, while each Hydrogen needs 1. They will share to form water. <br><button class='btn-action' onclick='animateH2O()'>Animate H₂O Formation</button>";
+    }
+
+    function animateH2O() {
+        document.getElementById('hydrogen1').style.left = "43%";
+        document.getElementById('hydrogen1').style.top = "160px";
+        document.getElementById('hydrogen2').style.left = "43%";
+        document.getElementById('hydrogen2').style.bottom = "160px";
+        setTimeout(() => {
+            chemInfo.innerHTML = "💧 <b>H₂O (Water) Molecule:</b> Formed by <b>covalent bonds</b>, where electrons are shared between oxygen and hydrogen atoms, making all atoms stable. This bond is very strong!";
+        }, 1500);
+    }
+
+    // 4. NaCl Formation (Ionic Bond)
+    function loadNaClFormation() {
+        chemCanvas.innerHTML = `
+            <div class="atom atom-na" id="sodium-atom" style="left: 20%; top: 50%; transform: translateY(-50%);">Na<div id="transfer-e" class="electron" style="right: -8px; top: 50%; transform: translateY(-50%);"></div></div>
+            <div class="atom atom-cl" id="chlorine-atom" style="right: 20%; top: 50%; transform: translateY(-50%);">Cl</div>`;
+        chemInfo.innerHTML = "<b>Ionic Bonding:</b> Some atoms donate electrons to others instead of sharing. Sodium donates 1 electron to Chlorine to form a stable ionic bond. <br><button class='btn-action' onclick='animateNaCl()'>Animate NaCl Formation</button>";
+    }
+
+    function animateNaCl() {
+        const transferE = document.getElementById('transfer-e');
+        transferE.style.transform = "translateX(300px) translateY(-50%)";
+        setTimeout(() => {
+            document.getElementById('sodium-atom').style.opacity = "0.6";
+            document.getElementById('chlorine-atom').style.opacity = "0.6";
+            chemInfo.innerHTML = "🧂 <b>NaCl (Salt) Molecule:</b> Formed by <b>ionic bond</b>, where one atom completely transfers electrons to another, creating opposite charges that attract. This is how table salt is formed!";
+        }, 1500);
+    }
+</script>
+</body>
+</html>

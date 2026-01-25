@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Interactive Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --bg-canvas: #ffffff;
+            --border-light: #e2e8f0;
+            --shadow-light: rgba(0,0,0,0.08);
+            --shadow-strong: rgba(0,0,0,0.15);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 960px;
+            margin: auto;
+            background: var(--bg-canvas);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-light);
+        }
+        h1, h2 {
+            color: var(--text-dark);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1rem;
+            color: #4b5563;
+        }
+
+        /* Menu & Buttons */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .btn-topic {
+            background: var(--primary-blue);
+            color: white;
+            padding: 15px 10px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-topic:hover {
+            background: #2563eb;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-strong);
+        }
+        .btn-action {
+            background: var(--primary-blue);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .btn-action:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Lab Canvas */
+        .lab-canvas {
+            height: 480px;
+            background: var(--bg-canvas);
+            border: 2px solid var(--border-light);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+        }
+
+        /* Objects and Elements */
+        .object {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .ball {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);
+            border: 2px solid #b45309;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+        }
+
+        .vector {
+            position: absolute;
+            background: var(--primary-blue);
+            transform-origin: left center;
+            border-radius: 3px;
+        }
+
+        .vector-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
+
+        .ramp {
+            position: absolute;
+            width: 200px;
+            height: 100px;
+            background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+            border: 2px solid #64748b;
+            transform: skewX(-20deg);
+            bottom: 0;
+        }
+
+        .floor {
+            position: absolute;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, #94a3b8, #64748b);
+            bottom: 0;
+            border-top: 3px solid #475569;
+        }
+
+        .pendulum-support {
+            position: absolute;
+            width: 400px;
+            height: 250px;
+            border: 3px solid #475569;
+            border-radius: 15px 15px 0 0;
+            top: 0;
+            background: linear-gradient(180deg, #f1f5f9, #e2e8f0);
+        }
+
+        .pendulum-string {
+            position: absolute;
+            width: 3px;
+            background: #334155;
+            transform-origin: top center;
+        }
+
+        .pendulum-bob {
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+        }
+
+        .wave-line {
+            position: absolute;
+            bottom: 200px;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-blue);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: #eef2ff;
+            border-left: 6px solid var(--primary-blue);
+            padding: 20px;
+            text-align: left;
+            border-radius: 10px;
+            min-height: 80px;
+            font-size: 0.95rem;
+            color: #374151;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+        .info-panel b {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @keyframes pendulum {
+            0%, 100% { transform: rotateZ(-30deg); }
+            50% { transform: rotateZ(30deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(20px); }
+        }
+
+        @keyframes fall {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(200px); opacity: 0; }
+        }
+
+        .animate-pendulum {
+            animation: pendulum 2s ease-in-out infinite;
+        }
+
+        .animate-bounce {
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button style="background: #e5e7eb; color: #1f2937; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 20px;" onclick="window.location.href='science.html'">← Back to Science Hub</button>
+    
+    <h1 style="color: var(--primary-blue);">Physics Interactive Lab</h1>
+    <p>Explore the fundamental laws of motion, forces, and energy through interactive experiments.</p>
+    
+    <div class="menu-grid">
+        <button class="btn-topic" onclick="loadGravityLab()">1. Gravity & Free Fall</button>
+        <button class="btn-topic" onclick="loadForcesLab()">2. Forces & Friction</button>
+        <button class="btn-topic" onclick="loadEnergyLab()">3. Kinetic Energy</button>
+        <button class="btn-topic" onclick="loadPendulumLab()">4. Simple Harmonic Motion</button>
+    </div>
+
+    <div class="lab-canvas" id="phys-canvas">
+        <p style="color: #6b7280;">Select a topic above to start your physics experiment!</p>
+    </div>
+
+    <div class="info-panel" id="phys-info">
+        <b>Welcome to Physics!</b> Here, we'll explore the laws that govern motion and forces in the universe.
+    </div>
+</div>
+
+<script>
+    const physCanvas = document.getElementById('phys-canvas');
+    const physInfo = document.getElementById('phys-info');
+
+    // 1. Gravity & Free Fall
+    function loadGravityLab() {
+        physCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%;">
+                <div class="floor"></div>
+                <div class="object ball" id="ball-earth" style="left: 20%; top: 50px;">
+                    <span style="font-size: 0.8rem;">9.8 m/s²</span>
+                </div>
+                <div class="object ball" id="ball-moon" style="left: 55%; top: 50px; background: radial-gradient(circle at 30% 30%, #e5e7eb, #9ca3af);">
+                    <span style="font-size: 0.8rem;">1.6 m/s²</span>
+                </div>
+                <div style="position: absolute; bottom: 100px; left: 10%; font-weight: bold; color: #475569;">Earth</div>
+                <div style="position: absolute; bottom: 100px; left: 45%; font-weight: bold; color: #475569;">Moon</div>
+                <div style="position: absolute; bottom: 90px; left: 65%; color: #64748b; font-size: 0.9rem;">Different gravity!</div>
+            </div>
+        `;
+        physInfo.innerHTML = `<b>Gravity - The Invisible Force:</b> All objects fall due to gravity, but the speed depends on the planet's mass. Earth's gravity (9.8 m/s²) is much stronger than the Moon's (1.6 m/s²) because Earth is more massive. Both objects will accelerate downward at these constant rates. <br><button class='btn-action' onclick='dropObjects()'>Drop Objects!</button> <button class='btn-action' onclick='resetLab()'>Reset</button>`;
+    }
+
+    function dropObjects() {
+        const ballE = document.getElementById('ball-earth');
+        const ballM = document.getElementById('ball-moon');
+        
+        ballE.style.transition = '2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        ballM.style.transition = '3.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        ballE.style.top = '350px';
+        ballM.style.top = '350px';
+        
+        physInfo.innerHTML = '<b>⚡ Falling:</b> Watch carefully! The Earth ball reaches the ground first (2 seconds) while the Moon ball takes longer (3.2 seconds). This ratio matches their gravity difference: 9.8/1.6 ≈ 6.1!';
+    }
+
+    // 2. Forces & Friction
+    function loadForcesLab() {
+        physCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%;">
+                <div class="floor"></div>
+                <div class="ramp" style="left: 50%; bottom: 80px;"></div>
+                <div class="object ball" id="smooth-ball" style="left: 30%; bottom: 120px; width: 45px; height: 45px;">
+                    <span style="font-size: 0.7rem;">Smooth</span>
+                </div>
+                <div class="object" id="rough-ball" style="left: 70%; bottom: 120px; width: 45px; height: 45px; background: #ef4444;">
+                    <span style="font-size: 0.7rem;">Rough</span>
+                </div>
+                <div style="position: absolute; bottom: 70px; left: 25%; color: #64748b; font-size: 0.85rem;">Low Friction</div>
+                <div style="position: absolute; bottom: 70px; left: 65%; color: #64748b; font-size: 0.85rem;">High Friction</div>
+            </div>
+        `;
+        physInfo.innerHTML = `<b>Friction - Opposition to Motion:</b> Friction is a force that opposes motion between surfaces. Smooth surfaces have low friction (ball slides far), while rough surfaces have high friction (ball stops quickly). <b>Formula: F = μ × N</b> (where μ is the coefficient of friction, N is normal force). <br><button class='btn-action' onclick='applyForce()'>Apply Force!</button> <button class='btn-action' onclick='resetLab()'>Reset</button>`;
+    }
+
+    function applyForce() {
+        const smoothBall = document.getElementById('smooth-ball');
+        const roughBall = document.getElementById('rough-ball');
+        
+        smoothBall.style.transition = '3s ease-out';
+        roughBall.style.transition = '1.2s ease-out';
+        
+        smoothBall.style.left = '80%';
+        roughBall.style.left = '80%';
+        
+        physInfo.innerHTML = '<b>🎯 Force Applied:</b> The smooth ball travels much farther (80% of the canvas) due to minimal friction. The rough ball stops much earlier (around 50%) because friction dissipates its energy quickly!';
+    }
+
+    // 3. Kinetic Energy
+    function loadEnergyLab() {
+        physCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%;">
+                <div class="floor"></div>
+                <div class="object ball" id="light-ball" style="left: 15%; top: 60px; width: 35px; height: 35px; background: radial-gradient(circle at 30% 30%, #60a5fa, #3b82f6);">
+                    <span style="font-size: 0.6rem;">2 kg</span>
+                </div>
+                <div class="object ball" id="heavy-ball" style="left: 55%; top: 60px; width: 60px; height: 60px; background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);">
+                    <span style="font-size: 0.7rem;">5 kg</span>
+                </div>
+                <div style="position: absolute; bottom: 100px; left: 5%; color: #64748b; font-size: 0.85rem;">Light</div>
+                <div style="position: absolute; bottom: 100px; left: 50%; color: #64748b; font-size: 0.85rem;">Heavy</div>
+                <div style="position: absolute; top: 20px; right: 20px; background: #eef2ff; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary-blue); width: 200px; font-size: 0.85rem; text-align: left;">
+                    <b>KE = ½ m v²</b><br>
+                    Light: KE = ½(2)(v²) = v²<br>
+                    Heavy: KE = ½(5)(v²) = 2.5v²
+                </div>
+            </div>
+        `;
+        physInfo.innerHTML = `<b>Kinetic Energy - Energy of Motion:</b> Objects in motion have kinetic energy proportional to their mass and the square of their velocity. <b>KE = ½mv²</b>. Even though both objects fall from the same height with the same speed, the heavier object has more kinetic energy! <br><button class='btn-action' onclick='releaseForEnergy()'>Release Both!</button> <button class='btn-action' onclick='resetLab()'>Reset</button>`;
+    }
+
+    function releaseForEnergy() {
+        const lightBall = document.getElementById('light-ball');
+        const heavyBall = document.getElementById('heavy-ball');
+        
+        lightBall.style.transition = '2s ease-in';
+        heavyBall.style.transition = '2s ease-in';
+        
+        lightBall.style.top = '380px';
+        heavyBall.style.top = '350px';
+        
+        physInfo.innerHTML = '<b>⚡ Impact:</b> Both objects reach the bottom in the same time (2 seconds) because they fall under the same gravity. However, the heavier object creates a bigger impact due to its greater kinetic energy!';
+    }
+
+    // 4. Pendulum - Simple Harmonic Motion
+    function loadPendulumLab() {
+        physCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%;">
+                <div class="pendulum-support"></div>
+                <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #1f2937; border-radius: 50%; z-index: 10;"></div>
+                <div style="position: absolute; top: 20px; left: 50%; width: 200px; height: 200px; display: flex; justify-content: center; align-items: flex-start;">
+                    <div id="pendulum" style="transform-origin: top center; width: 200px; height: 200px;">
+                        <div style="position: absolute; left: 50%; top: 0; width: 2px; height: 150px; background: #334155; transform: translateX(-50%);"></div>
+                        <div class="object" style="width: 40px; height: 40px; left: 50%; top: 150px; transform: translateX(-50%); background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);">
+                            <span style="font-size: 0.6rem;">Mass</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 60%; text-align: center; background: #eef2ff; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary-blue);">
+                    <b>Period: T = 2π√(L/g)</b><br>
+                    <span style="font-size: 0.9rem;">L = Length | g = Gravity</span>
+                </div>
+            </div>
+        `;
+        physInfo.innerHTML = `<b>Simple Harmonic Motion - The Pendulum:</b> A pendulum swings back and forth in a predictable pattern. The time for one complete swing (period) depends only on the length and gravity: <b>T = 2π√(L/g)</b>. Longer pendulums swing slower! <br><button class='btn-action' onclick='swingPendulum()'>Start Swinging!</button> <button class='btn-action' onclick='resetLab()'>Reset</button>`;
+    }
+
+    function swingPendulum() {
+        const pendulum = document.getElementById('pendulum');
+        pendulum.classList.add('animate-pendulum');
+        physInfo.innerHTML = '<b>🎪 Swinging:</b> The pendulum oscillates smoothly back and forth. This motion is called Simple Harmonic Motion (SHM). Notice how it takes the same time for each swing - this predictability is why pendulums were used in old clocks!';
+    }
+
+    // Utility Functions
+    function resetLab() {
+        location.reload();
+    }
+
+    // Initialize
+    window.addEventListener('load', function() {
+        physCanvas.innerHTML = '<p style="color: #6b7280;">Select a topic above to start your physics experiment!</p>';
+    });
+</script>
+</body>
+</html>

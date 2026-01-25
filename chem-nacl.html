@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ionic NaCl Formation</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lab-container { position: relative; height: 400px; background: #f8fafc; border-radius: 30px; border: 3px solid #e2e8f0; overflow: hidden; }
+        .atom { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: 1.2s; }
+        .na { width: 80px; height: 80px; background: #a855f7; top: 150px; left: 15%; }
+        .cl { width: 100px; height: 100px; background: #22c55e; top: 140px; right: 15%; }
+        .electron { width: 14px; height: 14px; background: #facc15; border-radius: 50%; position: absolute; border: 2px solid #ca8a04; transition: 1s; right: -5px; }
+        .salt-box { font-size: 8rem; display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .info-panel { margin-top: 20px; padding: 20px; background: white; border-radius: 15px; border-left: 5px solid #a855f7; }
+        .charge { position: absolute; top: -20px; font-size: 1.2rem; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="science.html" class="btn" style="background:#64748b">← Back</a>
+        <h2>Ionic Bonding: Making Salt (NaCl)</h2>
+
+        <div class="lab-container">
+            <div id="na" class="atom na">Na <div id="e" class="electron"></div> <div id="plus" class="charge" style="color:#a855f7">+</div></div>
+            <div id="cl" class="atom cl">Cl <div id="minus" class="charge" style="color:#22c55e; right:0;">-</div></div>
+            <div id="salt" class="salt-box">🧂</div>
+        </div>
+
+        <div class="info-panel" id="instruction">
+            <strong>State:</strong> Sodium (Na) tar bairer shell er 1-ti electron Chlorine (Cl) ke diye dite chay.
+        </div>
+
+        <button class="btn" id="stepBtn" onclick="runNaClProcess()" style="margin-top:20px; background:#a855f7;">Step 1: Transfer Electron</button>
+
+        <div id="congrats" class="congrats">
+            <h1>🎉 Salt Molecule Ready!</h1>
+            <p>Sodium electron <b>Deye diyeche</b>, tai tara ekhon Ionic Bond toiri koreche.</p>
+            <button class="btn" onclick="location.reload()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let step = 0;
+        function runNaClProcess() {
+            const na = document.getElementById('na'), cl = document.getElementById('cl'), e = document.getElementById('e');
+            const info = document.getElementById('instruction'), btn = document.getElementById('stepBtn');
+            step++;
+
+            if(step === 1) {
+                e.style.transform = "translateX(380px)";
+                info.innerHTML = "<strong>Step 1:</strong> Sodium electron-ti Chlorine ke diye dilo!";
+                btn.innerText = "Step 2: Opposite Attraction";
+            } else if(step === 2) {
+                document.getElementById('plus').style.display = "block";
+                document.getElementById('minus').style.display = "block";
+                na.style.left = "38%"; cl.style.right = "38%";
+                info.innerHTML = "<strong>Step 2:</strong> Positive (+) ebong Negative (-) charge ekhon eke oporke akorshon korche.";
+                btn.innerText = "Step 3: Form Salt";
+            } else if(step === 3) {
+                na.style.opacity = "0"; cl.style.opacity = "0";
+                document.getElementById('salt').style.display = "block";
+                info.innerHTML = "<strong>Step 3:</strong> Amra pelam Salt (NaCl) molecule!";
+                setTimeout(() => { document.getElementById('congrats').classList.add('show'); }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>

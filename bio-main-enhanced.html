@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Interactive Lab - Enhanced</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .biology-nav {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .biology-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .biology-nav a:hover {
+            color: var(--primary-bio);
+        }
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary-bio);
+        }
+        
+        .page-title h1 {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            margin-bottom: 0.5rem;
+        }
+        
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .topic-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .topic-card:hover {
+            border-color: var(--primary-bio);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(149, 225, 211, 0.2);
+        }
+        
+        .topic-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .topic-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .topic-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .lab-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .lab-canvas {
+            width: 100%;
+            height: clamp(300px, 60vw, 500px);
+            background: linear-gradient(135deg, #f0fff5 0%, #e0f5f0 100%);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visualization {
+            text-align: center;
+            width: 100%;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-bio {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-bio), var(--accent-bio));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-bio:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(149, 225, 211, 0.3);
+        }
+        
+        .info-panel {
+            background: linear-gradient(135deg, rgba(149, 225, 211, 0.1), rgba(149, 225, 211, 0.05));
+            border-left: 4px solid var(--primary-bio);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .quiz-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .quiz-question {
+            margin-bottom: 1.5rem;
+        }
+        
+        .quiz-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .quiz-option {
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: left;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--primary-bio);
+            transform: translateX(4px);
+        }
+        
+        .quiz-option.selected {
+            background: var(--primary-bio);
+            color: white;
+            border-color: var(--primary-bio);
+        }
+        
+        .quiz-option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .quiz-option.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .result-message {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-top: 1rem;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-message.correct {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        
+        .result-message.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+        
+        .info-row {
+            padding: 0.75rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(149, 225, 211, 0.2);
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .info-value {
+            background: white;
+            color: var(--primary-bio);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .topics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .lab-section {
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .btn-bio {
+                min-width: unset;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-container {
+                padding: 1rem;
+            }
+            
+            .topics-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+            
+            .lab-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .lab-canvas {
+                height: 250px;
+                margin: 1rem 0;
+            }
+            
+            .quiz-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="biology-nav">
+        <h3 style="color: var(--primary-bio); margin: 0;">🧬 Biology Lab</h3>
+        <a href="science.html">← Back</a>
+    </nav>
+    
+    <div class="page-container">
+        <div class="page-title">
+            <h1>Biology Virtual Laboratory</h1>
+            <p>Discover the amazing world of cells, genetics, and life processes through interactive experiments</p>
+        </div>
+        
+        <div class="topics-grid">
+            <div class="topic-card" onclick="loadTopic('cells')">
+                <div class="topic-icon">🔬</div>
+                <div class="topic-title">Cell Biology</div>
+                <div class="topic-desc">Explore cell structure and mitosis</div>
+            </div>
+            <div class="topic-card" onclick="loadTopic('genetics')">
+                <div class="topic-icon">🧬</div>
+                <div class="topic-title">Genetics & DNA</div>
+                <div class="topic-desc">Understand DNA structure and inheritance</div>
+            </div>
+            <div class="topic-card" onclick="loadTopic('photosynthesis')">
+                <div class="topic-icon">☀️</div>
+                <div class="topic-title">Photosynthesis</div>
+                <div class="topic-desc">How plants convert sunlight to energy</div>
+            </div>
+            <div class="topic-card" onclick="loadTopic('ecosystems')">
+                <div class="topic-icon">🌍</div>
+                <div class="topic-title">Ecosystems</div>
+                <div class="topic-desc">Food chains and biodiversity</div>
+            </div>
+        </div>
+        
+        <!-- CELL BIOLOGY SECTION -->
+        <div id="cells-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-bio); margin-top: 0;">Cell Biology - Structure & Division</h2>
+            <p>Cells are the basic unit of life. Learn about cell structures and how cells divide.</p>
+            
+            <div class="lab-canvas">
+                <div class="visualization">
+                    <svg width="100" height="100" viewBox="0 0 100 100" style="max-width: 200px; margin-top: 20px;">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#95e1d3" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="20" fill="#95e1d3" opacity="0.3"/>
+                        <circle cx="35" cy="35" r="8" fill="#4ecdc4" opacity="0.6"/>
+                        <circle cx="65" cy="35" r="6" fill="#4ecdc4" opacity="0.5"/>
+                        <circle cx="45" cy="60" r="5" fill="#4ecdc4" opacity="0.5"/>
+                    </svg>
+                    <p style="color: var(--text-muted); margin-top: 10px;">Plant Cell Structure</p>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-row">
+                    <span class="info-label">Nucleus</span>
+                    <span class="info-value">Controls cell activity</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Mitochondria</span>
+                    <span class="info-value">Energy production</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Chloroplasts</span>
+                    <span class="info-value">Photosynthesis (plants)</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Cell Membrane</span>
+                    <span class="info-value">Controls what enters/exits</span>
+                </div>
+            </div>
+            
+            <h3 style="color: var(--primary-bio); margin-top: 2rem;">Cell Division - Mitosis</h3>
+            <p>Cells divide through mitosis to create identical daughter cells.</p>
+            
+            <div class="button-group">
+                <button class="btn-bio" onclick="showMitosisPhase('prophase')">1️⃣ Prophase</button>
+                <button class="btn-bio" onclick="showMitosisPhase('metaphase')">2️⃣ Metaphase</button>
+                <button class="btn-bio" onclick="showMitosisPhase('anaphase')">3️⃣ Anaphase</button>
+                <button class="btn-bio" onclick="showMitosisPhase('telophase')">4️⃣ Telophase</button>
+            </div>
+            
+            <div id="mitosis-info" class="info-panel" style="display: none; margin-top: 1.5rem;">
+                <h4 id="phase-name" style="color: var(--primary-bio); margin-top: 0;"></h4>
+                <p id="phase-desc"></p>
+            </div>
+            
+            <!-- QUIZ -->
+            <div class="quiz-section">
+                <h3 style="color: var(--primary-bio); margin-top: 0;">Quick Quiz</h3>
+                <div class="quiz-question">
+                    <div class="quiz-title">Which organelle produces energy for the cell?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'cells-q1')">Nucleus</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'cells-q1')">Mitochondria ✓</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'cells-q1')">Ribosome</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'cells-q1')">Golgi apparatus</div>
+                    </div>
+                    <div class="result-message" id="cells-q1"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GENETICS SECTION -->
+        <div id="genetics-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-bio); margin-top: 0;">Genetics & DNA - Blueprint of Life</h2>
+            <p>DNA carries all the genetic information that makes you unique. Discover how traits are inherited.</p>
+            
+            <div class="lab-canvas">
+                <div class="visualization">
+                    <svg width="100" height="150" viewBox="0 0 100 150" style="max-width: 150px; margin-top: 10px;">
+                        <line x1="30" y1="20" x2="30" y2="130" stroke="#95e1d3" stroke-width="2"/>
+                        <line x1="70" y1="20" x2="70" y2="130" stroke="#95e1d3" stroke-width="2"/>
+                        <g id="dna-pairs">
+                            <line x1="30" y1="40" x2="70" y2="40" stroke="#4ecdc4" stroke-width="2"/>
+                            <line x1="25" y1="55" x2="75" y2="60" stroke="#4ecdc4" stroke-width="2"/>
+                            <line x1="30" y1="75" x2="70" y2="75" stroke="#4ecdc4" stroke-width="2"/>
+                            <line x1="28" y1="95" x2="72" y2="98" stroke="#4ecdc4" stroke-width="2"/>
+                            <line x1="30" y1="115" x2="70" y2="115" stroke="#4ecdc4" stroke-width="2"/>
+                        </g>
+                    </svg>
+                    <p style="color: var(--text-muted); margin-top: 10px;">DNA Double Helix</p>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-row">
+                    <span class="info-label">DNA Components</span>
+                    <span class="info-value">Sugar, Phosphate, Bases</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Base Pairing</span>
+                    <span class="info-value">A-T, G-C</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Genes</span>
+                    <span class="info-value">DNA segments coding traits</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Chromosomes</span>
+                    <span class="info-value">46 in humans (23 pairs)</span>
+                </div>
+            </div>
+            
+            <h3 style="color: var(--primary-bio); margin-top: 2rem;">DNA Replication</h3>
+            <p>DNA creates an exact copy of itself so genetic information is passed to daughter cells.</p>
+            
+            <div class="button-group">
+                <button class="btn-bio" onclick="startDNAReplication()">▶️ Start Replication</button>
+                <button class="btn-bio" style="background: white; color: var(--primary-bio); border: 2px solid var(--primary-bio);" onclick="resetDNAReplication()">Reset</button>
+            </div>
+            
+            <!-- QUIZ -->
+            <div class="quiz-section">
+                <h3 style="color: var(--primary-bio); margin-top: 0;">Quick Quiz</h3>
+                <div class="quiz-question">
+                    <div class="quiz-title">What does DNA stand for?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'genetics-q1')">Deoxyribose Nucleic Acid</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'genetics-q1')">Deoxyribonucleic Acid ✓</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'genetics-q1')">Deoxy Nuclear Compound</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'genetics-q1')">Deoxyribose Non-protein</div>
+                    </div>
+                    <div class="result-message" id="genetics-q1"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PHOTOSYNTHESIS SECTION -->
+        <div id="photosynthesis-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-bio); margin-top: 0;">Photosynthesis - Nature's Energy Conversion</h2>
+            <p>Plants convert sunlight into chemical energy (glucose) to fuel their growth.</p>
+            
+            <div class="lab-canvas">
+                <div class="visualization" style="padding: 20px;">
+                    <div style="background: linear-gradient(to bottom, #87ceeb, #90ee90); padding: 20px; border-radius: 10px; color: white; font-weight: bold;">
+                        <p>☀️ Light Energy</p>
+                        <p style="color: var(--primary-bio);">+</p>
+                        <p>💧 Water + CO₂</p>
+                        <p style="color: var(--primary-bio);">↓</p>
+                        <p style="color: #ffd700;">🍯 Glucose + O₂</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-row">
+                    <span class="info-label">Light Reaction</span>
+                    <span class="info-value">Occurs in thylakoid</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Calvin Cycle</span>
+                    <span class="info-value">Occurs in stroma</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Chlorophyll</span>
+                    <span class="info-value">Absorbs light energy</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Products</span>
+                    <span class="info-value">Glucose & Oxygen</span>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-bio" onclick="calculatePhotosynthesis()">🌱 Calculate Production</button>
+            </div>
+            
+            <div id="photosynthesis-result" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(149, 225, 211, 0.1), rgba(149, 225, 211, 0.05)); border-left: 4px solid var(--primary-bio); border-radius: var(--radius-md);">
+                <p id="photo-text"></p>
+            </div>
+            
+            <!-- QUIZ -->
+            <div class="quiz-section">
+                <h3 style="color: var(--primary-bio); margin-top: 0;">Quick Quiz</h3>
+                <div class="quiz-question">
+                    <div class="quiz-title">What is the main pigment in photosynthesis?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'photo-q1')">Chlorophyll ✓</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'photo-q1')">Carotenoid</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'photo-q1')">Xanthophyll</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'photo-q1')">Anthocyanin</div>
+                    </div>
+                    <div class="result-message" id="photo-q1"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ECOSYSTEMS SECTION -->
+        <div id="ecosystems-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-bio); margin-top: 0;">Ecosystems - Interconnected Life</h2>
+            <p>Explore how organisms interact in food chains, food webs, and ecological communities.</p>
+            
+            <h3 style="color: var(--primary-bio); margin-top: 1.5rem;">Food Chain Example</h3>
+            <div class="lab-canvas">
+                <div class="visualization" style="padding: 20px; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <p style="font-size: 2rem;">☀️</p>
+                        <p style="font-size: 0.8rem; font-weight: bold;">Sun</p>
+                    </div>
+                    <p style="color: var(--primary-bio); font-weight: bold;">→</p>
+                    <div style="text-align: center;">
+                        <p style="font-size: 2rem;">🌱</p>
+                        <p style="font-size: 0.8rem; font-weight: bold;">Plants</p>
+                    </div>
+                    <p style="color: var(--primary-bio); font-weight: bold;">→</p>
+                    <div style="text-align: center;">
+                        <p style="font-size: 2rem;">🐛</p>
+                        <p style="font-size: 0.8rem; font-weight: bold;">Herbivores</p>
+                    </div>
+                    <p style="color: var(--primary-bio); font-weight: bold;">→</p>
+                    <div style="text-align: center;">
+                        <p style="font-size: 2rem;">🦁</p>
+                        <p style="font-size: 0.8rem; font-weight: bold;">Carnivores</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-row">
+                    <span class="info-label">Producers</span>
+                    <span class="info-value">Plants - make own food</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Primary Consumer</span>
+                    <span class="info-value">Herbivores - eat plants</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Secondary Consumer</span>
+                    <span class="info-value">Carnivores - eat herbivores</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Decomposers</span>
+                    <span class="info-value">Bacteria - recycle nutrients</span>
+                </div>
+            </div>
+            
+            <!-- QUIZ -->
+            <div class="quiz-section">
+                <h3 style="color: var(--primary-bio); margin-top: 0;">Quick Quiz</h3>
+                <div class="quiz-question">
+                    <div class="quiz-title">Which organisms produce their own food?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'eco-q1')">Plants ✓</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'eco-q1')">Animals</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'eco-q1')">Fungi</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'eco-q1')">Bacteria</div>
+                    </div>
+                    <div class="result-message" id="eco-q1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTopic = null;
+        
+        function loadTopic(topic) {
+            document.querySelectorAll('[id$="-section"]').forEach(el => {
+                if (el.id !== topic + '-section') el.style.display = 'none';
+            });
+            currentTopic = topic;
+            document.getElementById(topic + '-section').style.display = 'block';
+            document.querySelector('.page-container').scrollIntoView({behavior: 'smooth'});
+        }
+        
+        function showMitosisPhase(phase) {
+            const phases = {
+                prophase: {
+                    name: 'Prophase',
+                    desc: 'Chromosomes become visible. Nuclear envelope breaks down. Spindle fibers form.'
+                },
+                metaphase: {
+                    name: 'Metaphase',
+                    desc: 'Chromosomes align at the cell equator. Spindle fibers attach to centromeres.'
+                },
+                anaphase: {
+                    name: 'Anaphase',
+                    desc: 'Sister chromatids separate. Move to opposite poles of the cell.'
+                },
+                telophase: {
+                    name: 'Telophase',
+                    desc: 'Nuclear envelopes reform around each set of chromosomes. Cell begins to divide.'
+                }
+            };
+            
+            document.getElementById('phase-name').textContent = phases[phase].name;
+            document.getElementById('phase-desc').textContent = phases[phase].desc;
+            document.getElementById('mitosis-info').style.display = 'block';
+        }
+        
+        function startDNAReplication() {
+            const result = document.getElementById('photosynthesis-result');
+            result.innerHTML = '<p>DNA replication complete! Two identical DNA molecules created for daughter cells. Each strand serves as template for new complementary strand.</p>';
+            result.style.display = 'block';
+        }
+        
+        function resetDNAReplication() {
+            document.getElementById('photosynthesis-result').style.display = 'none';
+        }
+        
+        function calculatePhotosynthesis() {
+            const glucose = 180;
+            const oxygen = 180;
+            const result = document.getElementById('photosynthesis-result');
+            result.innerHTML = `<p><strong>Production Rate:</strong></p><p>Glucose produced: ~${glucose} molecules</p><p>Oxygen released: ~${oxygen} molecules</p><p>A single plant can produce enough oxygen for multiple people daily!</p>`;
+            result.style.display = 'block';
+        }
+        
+        function checkAnswer(element, isCorrect, questionId) {
+            const siblings = element.parentElement.querySelectorAll('.quiz-option');
+            siblings.forEach(sibling => {
+                sibling.style.pointerEvents = 'none';
+                sibling.classList.remove('selected');
+            });
+            
+            element.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            const resultEl = document.getElementById(questionId);
+            if (isCorrect) {
+                resultEl.textContent = '✓ Correct! Well done!';
+                resultEl.className = 'result-message correct';
+            } else {
+                resultEl.textContent = '✗ Try again! Check the information above.';
+                resultEl.className = 'result-message incorrect';
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            loadTopic('cells');
+        });
+    </script>
+</body>
+</html>
