@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Molecule World: Shell Explorer</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --accent: #facc15;
+            --text: #1e293b;
+            --bg: #f8fafc;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        
+        .shell-container { display: flex; gap: 20px; margin: 20px 0; max-width: 1000px; margin: auto; }
+
+        /* Lab View Styling */
+        .lab-view {
+            flex: 2; height: 500px; background: #ffffff; border-radius: 24px;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #e2e8f0; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .concept-panel {
+            flex: 1; background: #ffffff; padding: 25px; border-radius: 24px;
+            border-right: 6px solid var(--primary); box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Shell Rings */
+        .ring {
+            position: absolute; border: 2px solid #cbd5e1; border-radius: 50%;
+            display: flex; justify-content: center; transition: 0.3s;
+        }
+        .ring::after {
+            content: attr(data-label); position: absolute; top: -25px;
+            color: #64748b; font-weight: bold; font-size: 0.75rem;
+        }
+        .r1 { width: 140px; height: 140px; }
+        .r2 { width: 280px; height: 280px; }
+
+        /* Nucleus */
+        .nucleus-core {
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, #475569, #0f172a);
+            border-radius: 50%; z-index: 10; box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        /* Electrons */
+        #electron-layer { width: 100%; height: 100%; position: absolute; transition: transform 0.1s linear; }
+        .electron-shell {
+            width: 16px; height: 16px; background: var(--accent);
+            border-radius: 50%; position: absolute;
+            box-shadow: 0 0 12px var(--accent); border: 2px solid #ca8a04;
+            z-index: 15;
+        }
+
+        /* UI Elements */
+        .formula-box {
+            background: var(--primary); color: white; padding: 15px;
+            border-radius: 12px; margin-bottom: 20px; text-align: center;
+            font-weight: bold; font-size: 1.2rem;
+        }
+        .concept-list li { 
+            margin-bottom: 10px; padding: 12px; border-radius: 10px;
+            background: #f1f5f9; font-size: 0.9rem; border: 1px solid #e2e8f0;
+        }
+        .active-concept { background: #dbeafe !important; border-color: var(--primary) !important; font-weight: bold; }
+        
+        .shell-table { width: 100%; margin-top: 15px; font-size: 0.85rem; border-collapse: collapse; }
+        .shell-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
+
+        .btn {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Animation class */
+        .rotating { animation: spin 10s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div style="max-width: 1000px; margin: auto;">
+    <a href="sci-chemistry.html" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 20px;">← Back to Chemistry</a>
+    
+    <h2>2. Molecule World: Energy Shells</h2>
+    <p>Electrons organize themselves into layers. Use the formula $2n^2$ to calculate capacity!</p>
+
+    <div class="shell-container">
+        <div class="lab-view">
+            <div class="nucleus-core"></div>
+            <div class="ring r1" data-label="K-Shell (n=1)"></div>
+            <div class="ring r2" data-label="L-Shell (n=2)"></div>
+            <div id="electron-layer" class="rotating"></div>
+        </div>
+
+        <div class="concept-panel">
+            <div class="formula-box">Capacity Formula: $2n^2$</div>
+            
+            <ul class="concept-list" style="list-style:none; padding:0;">
+                <li id="shellK"><strong>K-Shell (n=1):</strong> Inner shell. Max 2 electrons.</li>
+                <li id="shellL"><strong>L-Shell (n=2):</strong> 2nd shell. Max 8 electrons.</li>
+            </ul>
+            
+            <table class="shell-table">
+                <tr style="color: #64748b;"><td>Shell Name</td><td>Max Capacity</td></tr>
+                <tr><td><strong>M-Shell (n=3)</strong></td><td>18 Electrons</td></tr>
+                <tr><td><strong>N-Shell (n=4)</strong></td><td>32 Electrons</td></tr>
+            </table>
+
+            <button class="btn" onclick="addElectron()" style="background:#3b82f6;">Add Electron</button>
+            <button class="btn" id="motionBtn" onclick="toggleMotion()" style="background:#10b981;">Pause Motion</button>
+            <button class="btn" onclick="resetLab()" style="background:#94a3b8;">Clear Lab</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let count = 0;
+    let isMoving = true;
+    const layer = document.getElementById('electron-layer');
+
+    // Positions for K (r=70) and L (r=140) shells
+    const positions = [
+        /* K-Shell */ { r: 70, a: 0 }, { r: 70, a: 180 },
+        /* L-Shell */ { r: 140, a: 0 }, { r: 140, a: 45 }, { r: 140, a: 90 }, { r: 140, a: 135 },
+                      { r: 140, a: 180 }, { r: 140, a: 225 }, { r: 140, a: 270 }, { r: 140, a: 315 }
+    ];
+
+    function addElectron() {
+        if (count >= positions.length) {
+            alert("K and L shells are now full! According to the 2n² rule, next electrons would go to the M shell.");
+            return;
+        }
+
+        const pos = positions[count];
+        const e = document.createElement('div');
+        e.className = 'electron-shell';
+        
+        // Trigonometry to place electrons on the ring
+        const x = pos.r * Math.cos(pos.a * Math.PI / 180);
+        const y = pos.r * Math.sin(pos.a * Math.PI / 180);
+
+        e.style.left = `calc(50% + ${x}px - 8px)`;
+        e.style.top = `calc(50% + ${y}px - 8px)`;
+        
+        layer.appendChild(e);
+
+        // Highlight the current shell in the list
+        if (count < 2) highlight('shellK');
+        else highlight('shellL');
+
+        count++;
+    }
+
+    function toggleMotion() {
+        const btn = document.getElementById('motionBtn');
+        if (isMoving) {
+            layer.style.animationPlayState = 'paused';
+            btn.innerText = 'Start Motion';
+            btn.style.background = '#3b82f6';
+        } else {
+            layer.style.animationPlayState = 'running';
+            btn.innerText = 'Pause Motion';
+            btn.style.background = '#10b981';
+        }
+        isMoving = !isMoving;
+    }
+
+    function highlight(id) {
+        document.querySelectorAll('.concept-list li').forEach(li => li.classList.remove('active-concept'));
+        document.getElementById(id).classList.add('active-concept');
+    }
+
+    function resetLab() {
+        layer.innerHTML = '';
+        count = 0;
+        document.querySelectorAll('.concept-list li').forEach(li => li.classList.remove('active-concept'));
+    }
+</script>
+
+</body>
+</html>

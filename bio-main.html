@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Interactive Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #10b981;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --bg-canvas: #ffffff;
+            --border-light: #e2e8f0;
+            --shadow-light: rgba(0,0,0,0.08);
+            --shadow-strong: rgba(0,0,0,0.15);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 960px;
+            margin: auto;
+            background: var(--bg-canvas);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-light);
+        }
+        h1, h2 {
+            color: var(--text-dark);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1rem;
+            color: #4b5563;
+        }
+
+        /* Menu & Buttons */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .btn-topic {
+            background: var(--primary-green);
+            color: white;
+            padding: 15px 10px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-topic:hover {
+            background: #059669;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-strong);
+        }
+        .btn-action {
+            background: var(--primary-green);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .btn-action:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Lab Canvas */
+        .lab-canvas {
+            height: 480px;
+            background: var(--bg-canvas);
+            border: 2px solid var(--border-light);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+        }
+
+        /* Cell Structures */
+        .cell {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nucleus {
+            width: 80px;
+            height: 80px;
+            background: #d1fae5;
+            border: 2px solid var(--primary-green);
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--primary-green);
+        }
+
+        .organelle {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .mitochondria {
+            width: 60px;
+            height: 35px;
+            background: linear-gradient(90deg, #ec4899, #f472b6);
+            border-radius: 30px;
+        }
+
+        .chloroplast {
+            width: 50px;
+            height: 50px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px dashed #16a34a;
+        }
+
+        .ribosome {
+            width: 30px;
+            height: 30px;
+            background: #f59e0b;
+            border-radius: 50%;
+        }
+
+        .endoplasmic-reticulum {
+            width: 120px;
+            height: 60px;
+            background: #fca5a5;
+            border-radius: 15px;
+            opacity: 0.7;
+            border: 2px dashed #dc2626;
+        }
+
+        /* Ecosystem Elements */
+        .organism {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 2rem;
+        }
+
+        .organism:hover {
+            transform: scale(1.15);
+        }
+
+        .food-chain {
+            position: absolute;
+            width: 3px;
+            background: #34d399;
+            opacity: 0.5;
+        }
+
+        /* Human Body */
+        .organ {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 2.5rem;
+        }
+
+        .organ:hover {
+            transform: scale(1.2);
+        }
+
+        .body-outline {
+            width: 150px;
+            height: 300px;
+            border: 2px solid var(--primary-green);
+            border-radius: 50px;
+            position: relative;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: #ecfdf5;
+            border-left: 6px solid var(--primary-green);
+            padding: 20px;
+            text-align: left;
+            border-radius: 10px;
+            min-height: 80px;
+            font-size: 0.95rem;
+            color: #374151;
+            box-shadow: 0 5px 15px var(--shadow-light);
+        }
+        .info-panel b {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button style="background: #d1f2eb; color: #065f46; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 20px;" onclick="window.location.href='science.html'">← Back to Science Hub</button>
+    
+    <h1 style="color: var(--primary-green);">Biology Interactive Lab</h1>
+    <p>Explore the fascinating structures and processes of life through interactive simulations.</p>
+    
+    <div class="menu-grid">
+        <button class="btn-topic" onclick="loadCellLab()">1. Cell Structure</button>
+        <button class="btn-topic" onclick="loadPhotosynthesisLab()">2. Photosynthesis</button>
+        <button class="btn-topic" onclick="loadEcosystemLab()">3. Ecosystems</button>
+        <button class="btn-topic" onclick="loadBodySystemsLab()">4. Human Systems</button>
+    </div>
+
+    <div class="lab-canvas" id="bio-canvas">
+        <p style="color: #6b7280;">Select a topic above to start your biology experiment!</p>
+    </div>
+
+    <div class="info-panel" id="bio-info">
+        <b>Welcome to Biology!</b> Here, we'll explore the building blocks of life and how organisms interact with their environment.
+    </div>
+</div>
+
+<script>
+    const bioCanvas = document.getElementById('bio-canvas');
+    const bioInfo = document.getElementById('bio-info');
+
+    // 1. Cell Structure
+    function loadCellLab() {
+        bioCanvas.innerHTML = `
+            <div class="cell" style="width: 380px; height: 320px; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                <div class="nucleus" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                    <span>🧬 Nucleus</span>
+                </div>
+                <div class="organelle mitochondria" style="top: 80px; left: 50px;">⚡</div>
+                <div class="organelle mitochondria" style="bottom: 100px; right: 80px;">⚡</div>
+                <div class="organelle ribosome" style="top: 120px; right: 70px;">R</div>
+                <div class="organelle ribosome" style="bottom: 80px; left: 60px;">R</div>
+                <div class="organelle endoplasmic-reticulum" style="left: 130px; top: 60px;"></div>
+            </div>
+        `;
+        bioInfo.innerHTML = `<b>Cell Structure - The Unit of Life:</b> All living organisms are made of cells. A typical <b>Animal Cell</b> contains:
+        <br>• <b>Nucleus:</b> Controls cell activities and stores genetic material (DNA)
+        <br>• <b>Mitochondria:</b> Powerhouse of the cell - produces energy (ATP) through cellular respiration
+        <br>• <b>Ribosomes:</b> Manufactures proteins
+        <br>• <b>Endoplasmic Reticulum:</b> Network for protein synthesis and transport
+        <br><button class='btn-action' onclick='highlightOrganelles()'>Highlight Organelles</button>
+        <br><button class='btn-action' onclick='window.location.href="bio-cells.html"' style='background: #059669; margin-top: 10px;'>Watch Full Cell Division Animation</button>`;
+    }
+
+    function highlightOrganelles() {
+        const organelles = document.querySelectorAll('.organelle');
+        organelles.forEach(o => o.classList.toggle('pulse'));
+        bioInfo.innerHTML = '<b>✨ Organelles Highlighted!</b> Each organelle has a specific function that helps the cell survive and perform its role in the organism.';
+    }
+
+    // 2. Photosynthesis
+    function loadPhotosynthesisLab() {
+        bioCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(180deg, #87ceeb 0%, #90ee90 100%);">
+                <div style="position: absolute; bottom: 0; width: 100%; height: 100px; background: linear-gradient(180deg, #8b7355 0%, #654321 100%);"></div>
+                <div style="position: absolute; bottom: 100px; left: 20%; width: 150px; height: 200px; background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%); border-radius: 80px 80px 0 0;"></div>
+                <div style="position: absolute; bottom: 120px; left: 25%; width: 40px; height: 150px; background: #8b7355; border-radius: 20px;"></div>
+                <div style="position: absolute; top: 30px; left: 30%; font-size: 3rem; opacity: 0.8;">☀️</div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--primary-green); max-width: 350px;">
+                    <b>Photosynthesis Equation:</b><br>
+                    6CO₂ + 6H₂O + Light Energy → C₆H₁₂O₆ + 6O₂<br>
+                    <span style="font-size: 0.9rem; color: #4b5563;">Carbon Dioxide + Water + Sunlight → Glucose + Oxygen</span>
+                </div>
+            </div>
+        `;
+        bioInfo.innerHTML = `<b>Photosynthesis - Making Food from Sunlight:</b> Plants capture light energy and convert it into chemical energy stored in glucose. This process:
+        <br>• Takes place in <b>Chloroplasts</b> (green organelles)
+        <br>• Requires: Sunlight, Water (H₂O), and Carbon Dioxide (CO₂)
+        <br>• Produces: Glucose (food) and Oxygen (released to atmosphere)
+        <br>• Is the foundation of most food chains on Earth!
+        <br><button class='btn-action' onclick='activatePhotosynthesis()'>Activate Photosynthesis!</button>`;
+    }
+
+    function activatePhotosynthesis() {
+        bioInfo.innerHTML = '<b>⚡ Photosynthesis Active!</b> The plant is converting sunlight into glucose. This glucose is used for growth and stored as starch. The oxygen produced is released, which is why we need plants to breathe!';
+    }
+
+    // 3. Ecosystem
+    function loadEcosystemLab() {
+        bioCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(180deg, #87ceeb 0%, #90ee90 100%);">
+                <div style="position: absolute; bottom: 0; width: 100%; height: 60px; background: #8b4513;"></div>
+                <!-- Producers -->
+                <div class="organism" style="left: 10%; top: 60%; cursor: pointer;" onclick="showEcosystemInfo('Plant', '🌿 Producer: Creates food from sunlight (Photosynthesis)')">🌿</div>
+                <div class="organism" style="right: 15%; top: 65%; cursor: pointer;" onclick="showEcosystemInfo('Plant', '🌿 Producer: Creates food from sunlight (Photosynthesis)')">🌾</div>
+                <!-- Primary Consumers -->
+                <div class="organism" style="left: 25%; top: 40%; cursor: pointer;" onclick="showEcosystemInfo('Herbivore', '🦗 Primary Consumer: Eats plants')">🐛</div>
+                <div class="organism" style="right: 30%; top: 35%; cursor: pointer;" onclick="showEcosystemInfo('Herbivore', '🦗 Primary Consumer: Eats plants')">🐝</div>
+                <!-- Secondary Consumers -->
+                <div class="organism" style="left: 45%; top: 25%; cursor: pointer;" onclick="showEcosystemInfo('Carnivore', '🦅 Secondary Consumer: Eats herbivores')">🐦</div>
+                <div class="organism" style="right: 20%; top: 20%; cursor: pointer;" onclick="showEcosystemInfo('Carnivore', '🦅 Secondary Consumer: Eats herbivores')">🦊</div>
+                <div style="position: absolute; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary-green); max-width: 300px; font-size: 0.9rem;">
+                    <b>Ecosystem Structure:</b><br>
+                    Click on organisms to learn about their role!
+                </div>
+            </div>
+        `;
+        bioInfo.innerHTML = `<b>Ecosystem - Interconnected Life:</b> An ecosystem is a community of organisms and their physical environment interacting together.
+        <br>• <b>Producers:</b> Plants create food from sunlight
+        <br>• <b>Consumers:</b> Animals eat other organisms
+        <br>• <b>Decomposers:</b> Bacteria break down dead matter
+        <br><button class='btn-action' onclick='showFoodChain()'>Show Energy Flow</button>`;
+    }
+
+    function showEcosystemInfo(organism, info) {
+        bioInfo.innerHTML = '<b>' + organism + ':</b> ' + info;
+    }
+
+    function showFoodChain() {
+        bioInfo.innerHTML = '<b>🔄 Energy Flow in Ecosystems:</b> Energy flows from the sun → plants → herbivores → carnivores. At each level, about 90% of energy is lost as heat, so energy decreases up the food chain!';
+    }
+
+    // 4. Human Body Systems
+    function loadBodySystemsLab() {
+        bioCanvas.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%;">
+                <div class="body-outline" style="margin: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                <div class="organ" style="top: 15%; left: 45%;" onclick="showBodySystem('Brain', '🧠 Controls all body functions through the nervous system. Contains 86 billion neurons!')">🧠</div>
+                <div class="organ" style="top: 35%; left: 50%; transform: translateX(-50%);" onclick="showBodySystem('Heart', '❤️ Pumps blood throughout the body. Beats ~100,000 times per day!')">❤️</div>
+                <div class="organ" style="top: 40%; left: 30%;" onclick="showBodySystem('Lungs', '🫁 Exchange oxygen and CO2. Breathe ~20,000 times per day!')">🫁</div>
+                <div class="organ" style="top: 55%; left: 50%; transform: translateX(-50%);" onclick="showBodySystem('Stomach', '🍽️ Digests food into nutrients. Produces powerful acid!')">🍽️</div>
+                <div class="organ" style="bottom: 20%; left: 38%;" onclick="showBodySystem('Liver', '🫘 Filters blood and produces bile. Your largest internal organ!')">🫘</div>
+                <div class="organ" style="bottom: 20%; right: 38%;" onclick="showBodySystem('Kidneys', '👾 Filter waste from blood. Produce ~1-2 liters of urine daily!')">👾</div>
+            </div>
+        `;
+        bioInfo.innerHTML = `<b>Human Body Systems - Integrated Networks:</b> The human body consists of multiple systems working together:
+        <br>• <b>Nervous System:</b> Brain and nerves - control and communication
+        <br>• <b>Circulatory System:</b> Heart and blood vessels - transport nutrients and oxygen
+        <br>• <b>Respiratory System:</b> Lungs - exchange gases
+        <br>• <b>Digestive System:</b> Stomach and intestines - break down food
+        <br><b>Click on organs to learn more!</b>`;
+    }
+
+    function showBodySystem(organ, description) {
+        bioInfo.innerHTML = '<b>' + description + '</b>';
+    }
+
+    // Initialize
+    window.addEventListener('load', function() {
+        bioCanvas.innerHTML = '<p style="color: #6b7280;">Select a topic above to start your biology experiment!</p>';
+    });
+</script>
+</body>
+</html>

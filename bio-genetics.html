@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Genetics & DNA</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lab-container { position: relative; height: 450px; background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border-radius: 30px; border: 3px solid #10b981; overflow: hidden; }
+        
+        .dna-helix { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 200px; height: 350px; }
+        
+        .dna-strand { position: absolute; width: 100%; height: 100%; }
+        
+        .base-pair { position: absolute; left: 50%; width: 120px; height: 30px; transform: translateX(-50%); display: flex; align-items: center; justify-content: space-around; }
+        
+        .base { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.8rem; }
+        
+        .adenine { background: #3b82f6; }
+        .thymine { background: #ef4444; }
+        .guanine { background: #10b981; }
+        .cytosine { background: #f59e0b; }
+        
+        .info-panel { margin-top: 20px; padding: 20px; background: white; border-radius: 15px; border-left: 5px solid #10b981; }
+        .data-display { margin-top: 15px; background: #ecfdf5; padding: 15px; border-radius: 10px; font-family: monospace; text-align: left; border-left: 4px solid #10b981; }
+        
+        .controls { margin-top: 20px; padding: 15px; background: #f0fdf4; border-radius: 10px; }
+        
+        .genotype-box { background: white; padding: 15px; border-radius: 10px; border: 2px solid #10b981; margin: 10px 0; text-align: left; }
+        
+        @keyframes unwind { 0% { opacity: 0; transform: scaleY(0.5); } 100% { opacity: 1; transform: scaleY(1); } }
+        
+        .base-pair { animation: unwind 0.5s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="bio-main.html" class="btn" style="background:#10b981">← Back to Biology Lab</a>
+        <h2>Genetics & DNA Structure</h2>
+
+        <div class="lab-container" id="lab">
+            <div class="dna-helix" id="dna-container">
+                <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #6b7280; font-weight: bold;">Click "Reveal DNA" to see the structure</p>
+            </div>
+        </div>
+
+        <div class="info-panel" id="instruction">
+            <strong>DNA - The Blueprint of Life:</strong><br>
+            DNA (Deoxyribonucleic Acid) contains all genetic instructions for building and maintaining living organisms. It consists of four nitrogenous bases: Adenine (A), Thymine (T), Guanine (G), and Cytosine (C).
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="revealBtn" onclick="revealDNA()" style="background:#10b981; margin-right: 10px;">Reveal DNA Structure</button>
+            <button class="btn" id="replicateBtn" onclick="replicateDNA()" style="background:#10b981; display: none; margin-right: 10px;">DNA Replication</button>
+            <button class="btn" onclick="resetLab()" style="background:#64748b;">Reset</button>
+        </div>
+
+        <div class="data-display" id="data" style="display:none;">
+            <b>Base Pairing Rules (Chargaff's Rules):</b><br>
+            • Adenine (A) always pairs with Thymine (T) - 2 hydrogen bonds<br>
+            • Guanine (G) always pairs with Cytosine (C) - 3 hydrogen bonds<br>
+            <br><b>DNA Replication:</b><br>
+            During cell division, DNA replicates to create two identical copies. Each strand serves as a template for a new strand.
+        </div>
+
+        <div class="genotype-box" id="traits" style="display:none;">
+            <b>Mendelian Genetics Example:</b><br>
+            <span id="trait-content"></span>
+        </div>
+    </div>
+
+    <script>
+        const dnaContainer = document.getElementById('dna-container');
+        const basePairs = [
+            { base1: 'A', base2: 'T', color1: 'adenine', color2: 'thymine' },
+            { base1: 'G', base2: 'C', color1: 'guanine', color2: 'cytosine' },
+            { base1: 'T', base2: 'A', color1: 'thymine', color2: 'adenine' },
+            { base1: 'A', base2: 'T', color1: 'adenine', color2: 'thymine' },
+            { base1: 'C', base2: 'G', color1: 'cytosine', color2: 'guanine' },
+            { base1: 'G', base2: 'C', color1: 'guanine', color2: 'cytosine' },
+            { base1: 'A', base2: 'T', color1: 'adenine', color2: 'thymine' },
+            { base1: 'T', base2: 'A', color1: 'thymine', color2: 'adenine' },
+            { base1: 'G', base2: 'C', color1: 'guanine', color2: 'cytosine' },
+            { base1: 'A', base2: 'T', color1: 'adenine', color2: 'thymine' },
+        ];
+
+        function revealDNA() {
+            dnaContainer.innerHTML = '';
+            basePairs.forEach((pair, index) => {
+                const top = 40 + (index * 30);
+                const html = `
+                    <div class="base-pair" style="top: ${top}px; animation-delay: ${index * 0.1}s;">
+                        <div class="base ${pair.color1}">${pair.base1}</div>
+                        <div style="width: 30px; height: 2px; background: #10b981;"></div>
+                        <div class="base ${pair.color2}">${pair.base2}</div>
+                    </div>
+                `;
+                dnaContainer.innerHTML += html;
+            });
+
+            document.getElementById('revealBtn').style.display = 'none';
+            document.getElementById('replicateBtn').style.display = 'inline-block';
+            document.getElementById('data').style.display = 'block';
+            document.getElementById('traits').style.display = 'block';
+
+            document.getElementById('trait-content').innerHTML = `
+                <b>Example Trait: Eye Color</b><br>
+                • Dominant (B) = Brown eyes<br>
+                • Recessive (b) = Blue eyes<br>
+                <br>Parent 1: Bb (Brown) × Parent 2: Bb (Brown)<br>
+                Offspring: 25% BB (Brown) | 50% Bb (Brown) | 25% bb (Blue)
+            `;
+        }
+
+        function replicateDNA() {
+            document.getElementById('replicateBtn').disabled = true;
+            dnaContainer.innerHTML = '';
+            
+            // Show replication process
+            const delay = 200;
+            basePairs.forEach((pair, index) => {
+                setTimeout(() => {
+                    const top = 40 + (index * 30);
+                    const html = `
+                        <div class="base-pair" style="top: ${top}px;">
+                            <div class="base ${pair.color1}" style="opacity: 0.7;">${pair.base1}</div>
+                            <div style="width: 30px; height: 2px; background: #10b981;"></div>
+                            <div class="base ${pair.color2}">${pair.base2}</div>
+                            <div style="width: 3px; height: 20px; background: #3b82f6;"></div>
+                            <div class="base ${pair.color2}" style="opacity: 0.7;">${pair.base2}</div>
+                            <div style="width: 30px; height: 2px; background: #10b981;"></div>
+                            <div class="base ${pair.color1}">${pair.base1}</div>
+                        </div>
+                    `;
+                    dnaContainer.innerHTML += html;
+                }, index * delay);
+            });
+
+            setTimeout(() => {
+                document.getElementById('instruction').innerHTML = '<b>✨ DNA Replication Complete!</b> The original DNA has split, and each strand has built a complementary strand, creating two identical DNA molecules. This is how genetic information is passed to daughter cells!';
+                document.getElementById('replicateBtn').disabled = false;
+            }, basePairs.length * delay);
+        }
+
+        function resetLab() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

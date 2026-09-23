@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Interactive Lab - Enhanced</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chemistry-nav {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chemistry-nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .chemistry-nav a:hover {
+            color: var(--primary-chem);
+        }
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary-chem);
+        }
+        
+        .page-title h1 {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            margin-bottom: 0.5rem;
+        }
+        
+        .experiments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .experiment-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .experiment-card:hover {
+            border-color: var(--primary-chem);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(255, 107, 107, 0.2);
+        }
+        
+        .experiment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .experiment-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .experiment-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .lab-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .lab-canvas {
+            width: 100%;
+            height: clamp(300px, 60vw, 500px);
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .controls-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .control-value {
+            background: white;
+            color: var(--primary-chem);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .range-slider {
+            width: 100%;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-chem {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-chem), var(--accent-chem));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-chem:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+        
+        .info-panel {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+            border-left: 4px solid var(--primary-chem);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .data-display {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+            border-left: 4px solid var(--primary-chem);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        .data-display.show {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 107, 107, 0.2);
+        }
+        
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .data-value {
+            background: white;
+            color: var(--primary-chem);
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .atom-group {
+            display: inline-flex;
+            gap: 0.5rem;
+            margin: 0.5rem;
+        }
+        
+        .atom {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .atom-h { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .atom-o { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .atom-c { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .atom-n { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .experiments-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .lab-section {
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .btn-chem {
+                min-width: unset;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-container {
+                padding: 1rem;
+            }
+            
+            .experiments-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+            
+            .lab-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .lab-canvas {
+                height: 250px;
+                margin: 1rem 0;
+            }
+            
+            .controls-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .atom {
+                width: 40px;
+                height: 40px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="chemistry-nav">
+        <h3 style="color: var(--primary-chem); margin: 0;">⚗️ Chemistry Lab</h3>
+        <a href="science.html">← Back</a>
+    </nav>
+    
+    <div class="page-container">
+        <div class="page-title">
+            <h1>Chemistry Virtual Laboratory</h1>
+            <p>Explore atoms, molecules, reactions, and properties through interactive experiments</p>
+        </div>
+        
+        <div class="experiments-grid">
+            <div class="experiment-card" onclick="loadExperiment('atoms')">
+                <div class="experiment-icon">⚛️</div>
+                <div class="experiment-title">Atomic Structure</div>
+                <div class="experiment-desc">Understand atoms and subatomic particles</div>
+            </div>
+            <div class="experiment-card" onclick="loadExperiment('molecules')">
+                <div class="experiment-icon">🔬</div>
+                <div class="experiment-title">Molecules</div>
+                <div class="experiment-desc">Learn about molecular bonding and structure</div>
+            </div>
+            <div class="experiment-card" onclick="loadExperiment('reactions')">
+                <div class="experiment-icon">💥</div>
+                <div class="experiment-title">Chemical Reactions</div>
+                <div class="experiment-desc">Explore reaction types and processes</div>
+            </div>
+            <div class="experiment-card" onclick="loadExperiment('solutions')">
+                <div class="experiment-icon">🧪</div>
+                <div class="experiment-title">Solutions & pH</div>
+                <div class="experiment-desc">Understand concentrations and acidity</div>
+            </div>
+        </div>
+        
+        <!-- ATOMS SECTION -->
+        <div id="atoms-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-chem); margin-top: 0;">Atomic Structure</h2>
+            <p>Atoms are made of protons, neutrons, and electrons. The number of protons determines the element.</p>
+            
+            <div class="lab-canvas">
+                <svg width="200" height="200" viewBox="0 0 200 200">
+                    <!-- Nucleus -->
+                    <circle cx="100" cy="100" r="25" fill="url(#nuclearGradient)"/>
+                    <!-- Electron orbits -->
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+                    <circle cx="100" cy="100" r="100" fill="none" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
+                    <!-- Electrons -->
+                    <circle cx="170" cy="100" r="5" fill="#ff6b6b"/>
+                    <circle cx="85" cy="165" r="5" fill="#ff6b6b"/>
+                    <circle cx="35" cy="120" r="5" fill="#ff6b6b"/>
+                    <!-- Labels -->
+                    <text x="100" y="145" text-anchor="middle" font-weight="bold" font-size="12">Nucleus</text>
+                    <defs>
+                        <radialGradient id="nuclearGradient">
+                            <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ee5a6f;stop-opacity:1" />
+                        </radialGradient>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Atomic Number (Protons)</span>
+                        <span class="control-value" id="protons-value">6</span>
+                    </div>
+                    <input type="range" class="range-slider" id="protons-slider" min="1" max="20" value="6" oninput="updateProtons(this.value)">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Mass Number (Protons + Neutrons)</span>
+                        <span class="control-value" id="mass-value">12</span>
+                    </div>
+                    <input type="range" class="range-slider" id="mass-slider" min="1" max="40" value="12" oninput="updateMass(this.value)">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-chem" onclick="identifyElement()">🔍 Identify Element</button>
+            </div>
+            
+            <div class="data-display" id="atoms-data">
+                <div class="data-row">
+                    <span class="data-label">Element</span>
+                    <span class="data-value" id="element-name">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Electrons</span>
+                    <span class="data-value" id="electrons-count">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Neutrons</span>
+                    <span class="data-value" id="neutrons-count">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Atomic Notation</span>
+                    <span class="data-value" id="notation">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MOLECULES SECTION -->
+        <div id="molecules-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-chem); margin-top: 0;">Molecules & Bonding</h2>
+            <p>Molecules are formed when atoms bond together. Learn about different types of bonds.</p>
+            
+            <div class="lab-canvas">
+                <div style="text-align: center;">
+                    <h3 style="color: var(--primary-chem); margin-top: 0;">Water Molecule (H₂O)</h3>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin: 20px;">
+                        <div class="atom atom-h" style="font-size: 1rem;">H</div>
+                        <div style="font-size: 1.5rem; color: var(--primary-chem);">-</div>
+                        <div class="atom atom-o" style="font-size: 1rem;">O</div>
+                        <div style="font-size: 1.5rem; color: var(--primary-chem);">-</div>
+                        <div class="atom atom-h" style="font-size: 1rem;">H</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h3 style="color: var(--primary-chem); margin-top: 0;">Common Molecules</h3>
+                <div class="data-row">
+                    <span class="data-label">Glucose (C₆H₁₂O₆)</span>
+                    <span class="data-value">Energy source</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Carbon Dioxide (CO₂)</span>
+                    <span class="data-value">Gas in atmosphere</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Methane (CH₄)</span>
+                    <span class="data-value">Natural gas</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Salt (NaCl)</span>
+                    <span class="data-value">Ionic compound</span>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-chem" onclick="calculateMolecularWeight()">⚖️ Calculate Molecular Weight</button>
+            </div>
+            
+            <div class="data-display" id="molecules-data">
+                <div class="data-row">
+                    <span class="data-label">Molecular Formula</span>
+                    <span class="data-value" id="mol-formula">H₂O</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Molecular Weight</span>
+                    <span class="data-value" id="mol-weight">18 g/mol</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Moles (1g)</span>
+                    <span class="data-value" id="mol-count">0.056</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- REACTIONS SECTION -->
+        <div id="reactions-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-chem); margin-top: 0;">Chemical Reactions</h2>
+            <p>Chemical reactions occur when atoms rearrange to form new substances.</p>
+            
+            <div class="lab-canvas">
+                <div style="text-align: center;">
+                    <h3 style="color: var(--primary-chem); margin-top: 0;">Combustion Reaction</h3>
+                    <div style="font-size: 1.2rem; font-weight: bold;">
+                        CH₄ + 2O₂ → CO₂ + 2H₂O + Energy
+                    </div>
+                    <p style="color: var(--primary-chem); margin-top: 20px;">⬇️</p>
+                    <p style="font-size: 1.5rem;">💥 Exothermic (releases heat)</p>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h3 style="color: var(--primary-chem); margin-top: 0;">Types of Reactions</h3>
+                <div class="data-row">
+                    <span class="data-label">Combination</span>
+                    <span class="data-value">A + B → AB</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Decomposition</span>
+                    <span class="data-value">AB → A + B</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Single Replacement</span>
+                    <span class="data-value">A + BC → AC + B</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Double Replacement</span>
+                    <span class="data-value">AB + CD → AD + CB</span>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-chem" onclick="simulateReaction()">🔥 Simulate Combustion</button>
+            </div>
+            
+            <div class="data-display" id="reactions-data">
+                <div class="data-row">
+                    <span class="data-label">Reactants</span>
+                    <span class="data-value">CH₄ + O₂</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Products</span>
+                    <span class="data-value">CO₂ + H₂O</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Energy Released</span>
+                    <span class="data-value">~890 kJ/mol</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Reaction Type</span>
+                    <span class="data-value">Exothermic</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SOLUTIONS SECTION -->
+        <div id="solutions-section" class="lab-section" style="display: none;">
+            <h2 style="color: var(--primary-chem); margin-top: 0;">Solutions & pH Scale</h2>
+            <p>Learn about solution concentrations and how to measure acidity and basicity using pH.</p>
+            
+            <div class="lab-canvas">
+                <div style="text-align: center;">
+                    <h3 style="color: var(--primary-chem); margin-top: 0;">pH Scale (0-14)</h3>
+                    <div style="background: linear-gradient(to right, #FF0000, #FFFF00, #00FF00, #0000FF); height: 40px; border-radius: 8px; margin: 20px 0; position: relative;">
+                        <div style="position: absolute; top: -25px; left: 0%; transform: translateX(-50%); font-weight: bold;">0</div>
+                        <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-weight: bold;">7</div>
+                        <div style="position: absolute; top: -25px; left: 100%; transform: translateX(-50%); font-weight: bold;">14</div>
+                        <div style="position: absolute; bottom: -30px; left: 5%; font-size: 0.8rem;">Acidic</div>
+                        <div style="position: absolute; bottom: -30px; left: 45%; font-size: 0.8rem;">Neutral</div>
+                        <div style="position: absolute; bottom: -30px; left: 80%; font-size: 0.8rem;">Basic</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h3 style="color: var(--primary-chem); margin-top: 0;">pH of Common Substances</h3>
+                <div class="data-row">
+                    <span class="data-label">Battery Acid</span>
+                    <span class="data-value">pH ~0</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Lemon Juice</span>
+                    <span class="data-value">pH 2</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Pure Water</span>
+                    <span class="data-value">pH 7</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Baking Soda</span>
+                    <span class="data-value">pH 8</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Drain Cleaner</span>
+                    <span class="data-value">pH ~14</span>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Select a Substance</span>
+                    </div>
+                    <select id="substance-select" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-weight: 600;">
+                        <option value="">-- Choose --</option>
+                        <option value="acid">Acidic Substance (pH 2)</option>
+                        <option value="water">Pure Water (pH 7)</option>
+                        <option value="base">Basic Substance (pH 12)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-chem" onclick="testPH()">🧪 Test pH</button>
+            </div>
+            
+            <div class="data-display" id="solutions-data">
+                <div class="data-row">
+                    <span class="data-label">Substance</span>
+                    <span class="data-value" id="subst-name">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">pH Value</span>
+                    <span class="data-value" id="subst-ph">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Classification</span>
+                    <span class="data-value" id="subst-type">--</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">H⁺ Concentration</span>
+                    <span class="data-value" id="h-conc">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExperiment = null;
+        let protonsValue = 6;
+        let massValue = 12;
+        
+        function loadExperiment(exp) {
+            document.querySelectorAll('[id$="-section"]').forEach(el => el.style.display = 'none');
+            currentExperiment = exp;
+            document.getElementById(exp + '-section').style.display = 'block';
+            document.querySelector('.page-container').scrollIntoView({behavior: 'smooth'});
+        }
+        
+        // ATOMS
+        function updateProtons(val) {
+            protonsValue = parseInt(val);
+            document.getElementById('protons-value').textContent = val;
+        }
+        
+        function updateMass(val) {
+            massValue = parseInt(val);
+            document.getElementById('mass-value').textContent = val;
+        }
+        
+        function identifyElement() {
+            const elements = {
+                1: 'Hydrogen (H)',
+                2: 'Helium (He)',
+                3: 'Lithium (Li)',
+                4: 'Beryllium (Be)',
+                5: 'Boron (B)',
+                6: 'Carbon (C)',
+                7: 'Nitrogen (N)',
+                8: 'Oxygen (O)',
+                9: 'Fluorine (F)',
+                10: 'Neon (Ne)',
+                11: 'Sodium (Na)',
+                12: 'Magnesium (Mg)',
+                13: 'Aluminum (Al)',
+                14: 'Silicon (Si)',
+                15: 'Phosphorus (P)',
+                16: 'Sulfur (S)',
+                17: 'Chlorine (Cl)',
+                18: 'Argon (Ar)',
+                19: 'Potassium (K)',
+                20: 'Calcium (Ca)'
+            };
+            
+            const neutrons = massValue - protonsValue;
+            const element = elements[protonsValue] || 'Unknown';
+            
+            document.getElementById('element-name').textContent = element;
+            document.getElementById('electrons-count').textContent = protonsValue;
+            document.getElementById('neutrons-count').textContent = Math.max(0, neutrons);
+            document.getElementById('notation').textContent = `${element.split('(')[1].split(')')[0]}-${massValue}`;
+            document.getElementById('atoms-data').classList.add('show');
+        }
+        
+        // MOLECULES
+        function calculateMolecularWeight() {
+            document.getElementById('mol-formula').textContent = 'H₂O';
+            document.getElementById('mol-weight').textContent = '18 g/mol';
+            document.getElementById('mol-count').textContent = '0.056 mol';
+            document.getElementById('molecules-data').classList.add('show');
+        }
+        
+        // REACTIONS
+        function simulateReaction() {
+            document.getElementById('reactions-data').classList.add('show');
+        }
+        
+        // SOLUTIONS
+        function testPH() {
+            const select = document.getElementById('substance-select');
+            const value = select.value;
+            
+            if (!value) {
+                alert('Please select a substance');
+                return;
+            }
+            
+            const substances = {
+                acid: {
+                    name: 'Acidic Substance',
+                    ph: 2,
+                    type: 'Acidic',
+                    conc: '10⁻² M'
+                },
+                water: {
+                    name: 'Pure Water',
+                    ph: 7,
+                    type: 'Neutral',
+                    conc: '10⁻⁷ M'
+                },
+                base: {
+                    name: 'Basic Substance',
+                    ph: 12,
+                    type: 'Basic',
+                    conc: '10⁻¹² M'
+                }
+            };
+            
+            const substance = substances[value];
+            document.getElementById('subst-name').textContent = substance.name;
+            document.getElementById('subst-ph').textContent = 'pH ' + substance.ph;
+            document.getElementById('subst-type').textContent = substance.type;
+            document.getElementById('h-conc').textContent = substance.conc;
+            document.getElementById('solutions-data').classList.add('show');
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            loadExperiment('atoms');
+        });
+    </script>
+</body>
+</html>

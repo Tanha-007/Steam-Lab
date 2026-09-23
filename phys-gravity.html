@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detailed Gravity & Free Fall</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lab-container { position: relative; height: 450px; background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%); border-radius: 30px; border: 3px solid #0ea5e9; overflow: hidden; }
+        .object { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: all 0.05s linear; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .ball-earth { width: 70px; height: 70px; background: radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6); border: 2px solid #1e40af; z-index: 5; font-size: 0.8rem; }
+        .ball-moon { width: 60px; height: 60px; background: radial-gradient(circle at 30% 30%, #f3f4f6, #d1d5db); border: 2px solid #6b7280; z-index: 5; font-size: 0.7rem; }
+        #earth { top: 40px; left: 20%; }
+        #moon { top: 40px; left: 55%; }
+        .info-panel { margin-top: 20px; padding: 20px; background: white; border-radius: 15px; border-left: 5px solid #3b82f6; }
+        .data-display { margin-top: 15px; background: #eef2ff; padding: 15px; border-radius: 10px; font-family: monospace; text-align: left; }
+        .velocity-display { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); padding: 12px; border-radius: 8px; border-left: 3px solid #3b82f6; min-width: 150px; }
+        .height-marker { position: absolute; right: 10px; width: 30px; height: 2px; background: #cbd5e1; color: #64748b; font-size: 0.7rem; }
+        .floor { position: absolute; bottom: 0; width: 100%; height: 30px; background: linear-gradient(90deg, #78716c 0%, #92400e 100%); border-top: 2px solid #44403c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="phys-main.html" class="btn" style="background:#3b82f6">← Back to Physics Lab</a>
+        <h2>Detailed: Gravity & Free Fall</h2>
+
+        <div class="lab-container" id="lab">
+            <div class="velocity-display" id="velocity-info">
+                <strong>Velocities:</strong><br>
+                Earth: <span id="vel-earth">0.0</span> m/s<br>
+                Moon: <span id="vel-moon">0.0</span> m/s
+            </div>
+            <div class="height-marker" style="top: 50px;">50m</div>
+            <div class="height-marker" style="top: 150px;">100m</div>
+            <div class="height-marker" style="top: 250px;">150m</div>
+            <div class="height-marker" style="top: 350px;">200m</div>
+            <div id="earth" class="object ball-earth">🌍</div>
+            <div id="moon" class="object ball-moon">🌙</div>
+            <div class="floor"></div>
+        </div>
+
+        <div class="info-panel" id="instruction">
+            <strong>Gravity Experiment Setup:</strong><br>
+            Two objects are dropped from the same height. Watch how Earth's stronger gravity accelerates the object faster than the Moon's weaker gravity. Earth: g = 9.8 m/s² | Moon: g = 1.6 m/s²
+        </div>
+
+        <button class="btn" id="dropBtn" onclick="startExperiment()" style="margin-top:20px; background:#3b82f6; margin-right: 10px;">Drop Objects</button>
+        <button class="btn" onclick="resetExperiment()" style="margin-top:20px; background:#64748b;">Reset</button>
+
+        <div class="data-display" id="data" style="display:none;">
+            <strong>Final Results:</strong><br>
+            Earth Object: Time = 2.0s | Velocity = 19.6 m/s | Distance = 19.6 m<br>
+            Moon Object: Time = 3.2s | Velocity = 5.1 m/s | Distance = 5.1 m
+        </div>
+    </div>
+
+    <script>
+        const labContainer = document.getElementById('lab');
+        const earthObj = document.getElementById('earth');
+        const moonObj = document.getElementById('moon');
+        const dataDisplay = document.getElementById('data');
+
+        const GRAVITY_EARTH = 9.8;
+        const GRAVITY_MOON = 1.6;
+        const HEIGHT = 350; // pixels to fall
+        const PIXEL_TO_METER = 10; // 1 meter = 10 pixels
+
+        function startExperiment() {
+            document.getElementById('dropBtn').disabled = true;
+            dataDisplay.style.display = 'none';
+
+            let timeE = 0, timeM = 0;
+            let velE = 0, velM = 0;
+            let distE = 0, distM = 0;
+
+            // Calculate time to fall: s = 0.5 * g * t²
+            // 350px = HEIGHT
+            // HEIGHT / PIXEL_TO_METER meters = 0.5 * g * t²
+            const distInMeters = HEIGHT / PIXEL_TO_METER;
+            const timeTofallEarth = Math.sqrt((2 * distInMeters) / GRAVITY_EARTH);
+            const timeTofallMoon = Math.sqrt((2 * distInMeters) / GRAVITY_MOON);
+
+            const animationFrame = setInterval(() => {
+                if (timeE < timeTofallEarth) {
+                    timeE += 0.05;
+                    distE = 0.5 * GRAVITY_EARTH * timeE * timeE * PIXEL_TO_METER;
+                    velE = GRAVITY_EARTH * timeE;
+                    earthObj.style.top = (40 + distE) + 'px';
+                    document.getElementById('vel-earth').textContent = velE.toFixed(1);
+                }
+
+                if (timeM < timeTofallMoon) {
+                    timeM += 0.05;
+                    distM = 0.5 * GRAVITY_MOON * timeM * timeM * PIXEL_TO_METER;
+                    velM = GRAVITY_MOON * timeM;
+                    moonObj.style.top = (40 + distM) + 'px';
+                    document.getElementById('vel-moon').textContent = velM.toFixed(1);
+                }
+
+                if (timeE >= timeTofallEarth && timeM >= timeTofallMoon) {
+                    clearInterval(animationFrame);
+                    dataDisplay.style.display = 'block';
+                    document.getElementById('dropBtn').disabled = false;
+                }
+            }, 50);
+        }
+
+        function resetExperiment() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

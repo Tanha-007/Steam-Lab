@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Science Hub - STEM HoloVerse</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        }
+        
+        .science-nav {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-chem);
+        }
+        
+        .page {
+            display: none;
+            padding: 2rem 1.5rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        .page-header h1 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .back-button:hover {
+            background: var(--bg-card);
+            border-color: var(--primary-chem);
+            color: var(--primary-chem);
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .btn-experiment {
+            padding: 1.25rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+        
+        .btn-experiment.chem {
+            border-color: var(--primary-chem);
+            color: var(--primary-chem);
+        }
+        
+        .btn-experiment.chem:hover {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-experiment.phys {
+            border-color: var(--primary-phys);
+            color: var(--primary-phys);
+        }
+        
+        .btn-experiment.phys:hover {
+            background: linear-gradient(135deg, #4ecdc4, #3ab9b0);
+            color: white;
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(78, 205, 196, 0.3);
+        }
+        
+        .btn-experiment.bio {
+            border-color: var(--primary-bio);
+            color: var(--primary-bio);
+        }
+        
+        .btn-experiment.bio:hover {
+            background: linear-gradient(135deg, #95e1d3, #6fc8b8);
+            color: white;
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(149, 225, 211, 0.3);
+        }
+        
+        .hub-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+        
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 3rem;
+        }
+        
+        .portal-card {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: var(--radius-2xl);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-lg);
+            border: none;
+            padding: 2rem;
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1;
+        }
+        
+        .portal-card:hover::before {
+            left: 100%;
+        }
+        
+        .portal-card > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .portal-card h2 {
+            font-size: 2rem;
+            color: white;
+            margin: 0;
+            text-align: center;
+        }
+        
+        .portal-card p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        .portal-card.chem {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+        
+        .portal-card.phys {
+            background: linear-gradient(135deg, #4ecdc4 0%, #3ab9b0 100%);
+        }
+        
+        .portal-card.bio {
+            background: linear-gradient(135deg, #95e1d3 0%, #6fc8b8 100%);
+        }
+        
+        .portal-card:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .portal-icon {
+            font-size: 3rem;
+        }
+        
+        .lab-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary-chem);
+            color: white;
+            border-color: var(--primary-chem);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .science-nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .hub-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin-top: 2rem;
+            }
+            
+            .portal-card {
+                height: 200px;
+                padding: 1.5rem;
+            }
+            
+            .portal-card h2 {
+                font-size: 1.5rem;
+            }
+            
+            .portal-icon {
+                font-size: 2.5rem;
+            }
+            
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .tab-buttons {
+                gap: 0.5rem;
+            }
+            
+            .tab-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .lab-content {
+                padding: 1.5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .science-nav {
+                padding: 0.75rem;
+            }
+            
+            .hub-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin-top: 1.5rem;
+            }
+            
+            .portal-card {
+                height: 180px;
+                padding: 1rem;
+                gap: 0.5rem;
+            }
+            
+            .portal-card h2 {
+                font-size: 1.25rem;
+            }
+            
+            .portal-icon {
+                font-size: 2rem;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .btn-experiment {
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .page {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="science-nav">
+        <span class="nav-logo">🌀 STEM Hub</span>
+        <a href="index.html" class="nav-link">← Home</a>
+    </nav>
+
+    <!-- HUB PAGE -->
+    <div id="page-hub" class="page active">
+        <div class="hub-container">
+            <div style="text-align: center; max-width: 800px;">
+                <h1 style="font-size: clamp(2rem, 6vw, 3rem); margin-bottom: 1rem;">
+                    Explore Science
+                </h1>
+                <p style="font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-muted); margin-bottom: 2rem;">
+                    Choose a subject to start your interactive learning journey! 🚀
+                </p>
+            </div>
+            
+            <div class="hub-grid">
+                <div class="portal-card chem" onclick="showPage('page-chem')">
+                    <div class="portal-icon">🧪</div>
+                    <h2>Chemistry</h2>
+                    <p>Atoms & Molecules</p>
+                </div>
+                <div class="portal-card phys" onclick="showPage('page-phys')">
+                    <div class="portal-icon">⚛️</div>
+                    <h2>Physics</h2>
+                    <p>Motion & Forces</p>
+                </div>
+                <div class="portal-card bio" onclick="showPage('page-bio')">
+                    <div class="portal-icon">🧬</div>
+                    <h2>Biology</h2>
+                    <p>Life & Systems</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHEMISTRY PAGE -->
+    <div id="page-chem" class="page">
+        <div class="container">
+            <button class="back-button" onclick="showPage('page-hub')">← Back to Hub</button>
+            
+            <div class="page-header">
+                <h1 style="color: var(--primary-chem);">🧪 Chemistry Lab</h1>
+                <p>Explore atoms, molecules, and chemical bonding</p>
+            </div>
+            
+            <div class="menu-grid">
+                <button class="btn-experiment chem" onclick="window.location.href='sci-chemistry.html'">
+                    1. Atom Explorer
+                </button>
+                <button class="btn-experiment chem" onclick="window.location.href='sci-chemistry.html'">
+                    2. Molecule World
+                </button>
+                <button class="btn-experiment chem" onclick="window.location.href='chem-h2o.html'">
+                    3. H₂O Formation
+                </button>
+                <button class="btn-experiment chem" onclick="window.location.href='chem-nacl.html'">
+                    4. NaCl Bonding
+                </button>
+            </div>
+            
+            <div class="info-panel">
+                <strong>Welcome to Chemistry!</strong>
+                <p>Discover the building blocks of matter and how atoms combine to form the molecules that make up everything around us.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHYSICS PAGE -->
+    <div id="page-phys" class="page">
+        <div class="container">
+            <button class="back-button" onclick="showPage('page-hub')">← Back to Hub</button>
+            
+            <div class="page-header">
+                <h1 style="color: var(--primary-phys);">⚛️ Physics Lab</h1>
+                <p>Master motion, forces, and energy</p>
+            </div>
+            
+            <div class="menu-grid">
+                <button class="btn-experiment phys" onclick="window.location.href='phys-main.html'">
+                    1. Gravity & Free Fall
+                </button>
+                <button class="btn-experiment phys" onclick="window.location.href='phys-gravity.html'">
+                    2. Acceleration Demo
+                </button>
+                <button class="btn-experiment phys" onclick="window.location.href='phys-forces.html'">
+                    3. Forces & Friction
+                </button>
+                <button class="btn-experiment phys" onclick="window.location.href='phys-main.html'">
+                    4. Energy & Motion
+                </button>
+            </div>
+            
+            <div class="info-panel secondary">
+                <strong>Welcome to Physics!</strong>
+                <p>Understand the laws that govern motion, forces, and energy through interactive experiments and real calculations.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIOLOGY PAGE -->
+    <div id="page-bio" class="page">
+        <div class="container">
+            <button class="back-button" onclick="showPage('page-hub')">← Back to Hub</button>
+            
+            <div class="page-header">
+                <h1 style="color: var(--primary-bio);">🧬 Biology Lab</h1>
+                <p>Explore cells, genetics, and life systems</p>
+            </div>
+            
+            <div class="menu-grid">
+                <button class="btn-experiment bio" onclick="window.location.href='bio-main.html'">
+                    1. Cell Structure
+                </button>
+                <button class="btn-experiment bio" onclick="window.location.href='bio-cells.html'">
+                    2. Cell Division
+                </button>
+                <button class="btn-experiment bio" onclick="window.location.href='bio-genetics.html'">
+                    3. DNA & Genetics
+                </button>
+                <button class="btn-experiment bio" onclick="window.location.href='bio-main.html'">
+                    4. Ecosystems
+                </button>
+            </div>
+            
+            <div class="info-panel tertiary">
+                <strong>Welcome to Biology!</strong>
+                <p>Discover the fascinating world of living organisms, from cells to ecosystems, and understand the processes that sustain life.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    </script>
+</body>
+</html>

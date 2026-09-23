@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detailed Cell Structure & Division</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lab-container { position: relative; height: 450px; background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border-radius: 30px; border: 3px solid #10b981; overflow: hidden; }
+        
+        .cell { position: absolute; border-radius: 50%; border: 3px solid #10b981; background: rgba(209, 250, 229, 0.3); }
+        .cell-stage1 { width: 280px; height: 280px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+        
+        .nucleus { position: absolute; width: 90px; height: 90px; background: #d1fae5; border: 2px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; color: #10b981; }
+        
+        .organelle { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; transition: all 0.3s ease; }
+        
+        .mitochondria { width: 50px; height: 30px; background: linear-gradient(90deg, #ec4899, #f472b6); border-radius: 25px; }
+        .ribosome { width: 30px; height: 30px; background: #f59e0b; }
+        
+        .info-panel { margin-top: 20px; padding: 20px; background: white; border-radius: 15px; border-left: 5px solid #10b981; }
+        .data-display { margin-top: 15px; background: #ecfdf5; padding: 15px; border-radius: 10px; font-family: monospace; text-align: left; border-left: 4px solid #10b981; }
+        
+        .stage-indicator { position: absolute; top: 15px; right: 15px; background: white; padding: 12px; border-radius: 10px; border-left: 4px solid #10b981; font-weight: bold; }
+        
+        @keyframes divide { 0% { width: 280px; } 50% { width: 320px; } 100% { width: 180px; } }
+        @keyframes moveNucleus { 0% { transform: translate(-50%, -50%); } 100% { transform: translate(-80%, -50%); } }
+        
+        .dividing .nucleus { animation: moveNucleus 1.5s ease-in-out; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="bio-main.html" class="btn" style="background:#10b981">← Back to Biology Lab</a>
+        <h2>Cell Structure & Division</h2>
+
+        <div class="lab-container">
+            <div class="stage-indicator" id="stage">Stage: <strong>Interphase</strong></div>
+            <div id="cell" class="cell cell-stage1">
+                <div class="nucleus" id="nucleus" style="left: 50%; top: 50%; transform: translate(-50%, -50%);"><span>🧬</span></div>
+                <div class="organelle mitochondria" style="top: 50px; left: 40px;">⚡</div>
+                <div class="organelle mitochondria" style="bottom: 60px; right: 50px;">⚡</div>
+                <div class="organelle ribosome" style="top: 80px; right: 60px;">R</div>
+                <div class="organelle ribosome" style="bottom: 80px; left: 50px;">R</div>
+            </div>
+        </div>
+
+        <div class="info-panel" id="instruction">
+            <strong>Cell Division - The Process of Life:</strong><br>
+            Cells divide to grow, repair damage, and reproduce. This diagram shows <b>Mitosis</b>, the process of dividing one cell into two identical cells.
+        </div>
+
+        <button class="btn" id="startBtn" onclick="startMitosis()" style="margin-top:20px; background:#10b981; margin-right: 10px;">Start Mitosis</button>
+        <button class="btn" onclick="resetLab()" style="margin-top:20px; background:#64748b;">Reset</button>
+
+        <div class="data-display" id="data" style="display:none;">
+            <strong>Mitosis Phases:</strong><br>
+            1. <b>Prophase:</b> Chromosomes condense, nuclear membrane breaks down<br>
+            2. <b>Metaphase:</b> Chromosomes align at cell center<br>
+            3. <b>Anaphase:</b> Sister chromatids separate and move to opposite poles<br>
+            4. <b>Telophase:</b> Nuclear membranes reform, cytokinesis begins<br>
+            5. <b>Cytokinesis:</b> Cell completely divides into two daughter cells
+        </div>
+    </div>
+
+    <script>
+        let divisionStarted = false;
+
+        function startMitosis() {
+            if (divisionStarted) return;
+            divisionStarted = true;
+            document.getElementById('startBtn').disabled = true;
+
+            const cell = document.getElementById('cell');
+            const stage = document.getElementById('stage');
+
+            // Phase 1: Prophase (1 second)
+            setTimeout(() => {
+                stage.innerHTML = 'Stage: <strong>Prophase</strong>';
+                cell.style.transition = '1s ease';
+                cell.style.width = '300px';
+                cell.innerHTML = `
+                    <div class="nucleus" style="left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px dashed #10b981;">🧬</div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border: 3px solid #10b981; border-radius: 50%;"></div>
+                `;
+            }, 500);
+
+            // Phase 2: Metaphase (2 seconds)
+            setTimeout(() => {
+                stage.innerHTML = 'Stage: <strong>Metaphase</strong>';
+                cell.innerHTML = `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 200px; background: var(--primary-blue); opacity: 0.5;"></div>
+                    <div style="position: absolute; top: 35%; left: 50%; transform: translateX(-50%); width: 80px; height: 20px; background: #10b981; border-radius: 10px;"></div>
+                    <div style="position: absolute; bottom: 35%; left: 50%; transform: translateX(-50%); width: 80px; height: 20px; background: #10b981; border-radius: 10px;"></div>
+                `;
+            }, 1500);
+
+            // Phase 3: Anaphase (1.5 seconds)
+            setTimeout(() => {
+                stage.innerHTML = 'Stage: <strong>Anaphase</strong>';
+                cell.innerHTML = `
+                    <div style="position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 30px; background: #10b981; border-radius: 10px;"></div>
+                    <div style="position: absolute; bottom: 30%; left: 50%; transform: translate(-50%, 50%); width: 60px; height: 30px; background: #10b981; border-radius: 10px;"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 3px; height: 200px; background: #3b82f6; opacity: 0.5;"></div>
+                `;
+            }, 3000);
+
+            // Phase 4 & 5: Telophase & Cytokinesis (2 seconds)
+            setTimeout(() => {
+                stage.innerHTML = 'Stage: <strong>Cytokinesis</strong>';
+                cell.innerHTML = `
+                    <div class="cell cell-stage1" style="width: 130px; height: 130px; left: 35%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #10b981;">
+                        <div class="nucleus" style="left: 50%; top: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px;"><span style="font-size: 0.7rem;">🧬</span></div>
+                    </div>
+                    <div class="cell cell-stage1" style="width: 130px; height: 130px; right: 35%; top: 50%; transform: translate(50%, -50%); border: 2px solid #10b981;">
+                        <div class="nucleus" style="left: 50%; top: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px;"><span style="font-size: 0.7rem;">🧬</span></div>
+                    </div>
+                `;
+                document.getElementById('data').style.display = 'block';
+            }, 4500);
+
+            setTimeout(() => {
+                document.getElementById('startBtn').disabled = false;
+            }, 6500);
+        }
+
+        function resetLab() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
